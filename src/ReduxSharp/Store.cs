@@ -143,7 +143,21 @@ namespace ReduxSharp
         }
     }
 
+    /// <summary>
+    /// A function that accepts an action.
+    /// </summary>
+    /// <param name="action">
+    /// An object describing the change that makes sense for your application.
+    /// </param>
+    /// <returns>The dispatched action</returns>
     public delegate IAction DispatchDelegate(IAction action);
 
+    /// <summary>
+    /// A higher-order function that composes a dispatch function to return a new dispatch function.
+    /// </summary>
+    /// <typeparam name="TState">A type of root state tree</typeparam>
+    /// <param name="store">A store</param>
+    /// <param name="next">A dispatch function</param>
+    /// <returns>A new dispatch function</returns>
     public delegate DispatchDelegate MiddlewareDelegate<TState>(IStore<TState> store, DispatchDelegate next);
 }
