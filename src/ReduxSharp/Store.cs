@@ -5,6 +5,10 @@ using System.Threading;
 
 namespace ReduxSharp
 {
+    /// <summary>
+    /// A store that holds the complete state tree of your application.
+    /// </summary>
+    /// <typeparam name="TState">A type of root state tree</typeparam>
     public class Store<TState> : IStore<TState>
     {
         private readonly object _syncRoot = new object();
@@ -15,6 +19,18 @@ namespace ReduxSharp
 
         private readonly DispatchDelegate _dispatch;
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="Store{TState}"/> class.
+        /// </summary>
+        /// <param name="reducer">
+        /// A reducing object that returns the next state tree.
+        /// </param>
+        /// <param name="initialState">
+        /// The initial state.
+        /// </param>
+        /// <param name="middlewares">
+        /// Functions that conform to the Redux middleware API.
+        /// </param>
         public Store(IReducer<TState> reducer, TState initialState = default(TState), params MiddlewareDelegate<TState>[] middlewares)
         {
             if (reducer == null) throw new ArgumentNullException(nameof(reducer));
@@ -32,6 +48,9 @@ namespace ReduxSharp
             }
         }
 
+        /// <summary>
+        /// Returns the current state tree of your application.
+        /// </summary>
         public TState State { get; private set; }
 
         private DispatchDelegate ApplyMiddlewares(IEnumerable<MiddlewareDelegate<TState>> middlewares)
@@ -43,6 +62,16 @@ namespace ReduxSharp
                     (next, middleware) => middleware(this, next));
         }
 
+        /// <summary>
+        /// Dispatches an action.
+        /// </summary>
+        /// <remarks>
+        /// This is the only way to trigger a state change.
+        /// </remarks>
+        /// <param name="action">
+        /// An object describing the change that makes sense for your application.
+        /// </param>
+        /// <returns>The dispatched action</returns>
         public IAction Dispatch(IAction action)
         {
             if (action == null) throw new ArgumentNullException(nameof(action));
@@ -61,6 +90,16 @@ namespace ReduxSharp
             return action;
         }
 
+        /// <summary>
+        /// Notifies the provider that an observer is to receive notifications.
+        /// </summary>
+        /// <param name="observer">
+        /// The object that is to receive notifications.
+        /// </param>
+        /// <returns>
+        /// A reference to an interface that allows observers to stop receiving notifications
+        /// before the provider has finished sending them.
+        /// </returns>
         public IDisposable Subscribe(IObserver<TState> observer)
         {
             if (observer == null) throw new ArgumentNullException(nameof(observer));
