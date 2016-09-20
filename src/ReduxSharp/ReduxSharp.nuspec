@@ -3,13 +3,14 @@
     <metadata>
         <id>ReduxSharp</id>
         <version>0.0.1</version>
-        <authors>Takshi Nakamura</authors>
+        <authors>tnakamura</authors>
+        <owners>tnakamura</owners>
         <projectUrl>https://github.com/tnakamura/ReduxSharp</projectUrl>
+        <licenseUrl>http://opensource.org/licenses/MIT</licenseUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Unidirectional Data Flow in C# - Inspired by Redux</description>
-        <copyright>2016 Takashi Nakamura</copyright>
-        <language>ja-JP</language>
-        <tags>flux redux</tags>
+        <language>en-US</language>
+        <tags>Flux Redux</tags>
     </metadata>
     <files>
         <file src=".\bin\Release\ReduxSharp.dll" target="lib" />
