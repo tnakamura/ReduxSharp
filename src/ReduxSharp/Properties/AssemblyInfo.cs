@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyProduct("ReduxSharp")]
-[assembly: AssemblyCopyright("Copyright (C) Takashi Nakamura 2016")]
+[assembly: AssemblyCopyright("Copyright (C) tnakamura 2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: NeutralResourcesLanguage("ja")]
