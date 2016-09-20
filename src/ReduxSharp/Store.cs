@@ -45,13 +45,13 @@ namespace ReduxSharp
 
         public IAction Dispatch(IAction action)
         {
+            if (action == null) throw new ArgumentNullException(nameof(action));
+
             return _dispatch(action);
         }
 
         private IAction InternalDispatch(IAction action)
         {
-            if (action == null) throw new ArgumentNullException(nameof(action));
-
             lock (_syncRoot)
             {
                 var nextState = State = _reducer.Invoke(State, action);
@@ -63,8 +63,13 @@ namespace ReduxSharp
 
         public IDisposable Subscribe(IObserver<TState> observer)
         {
-            _observer.Add(observer);
-            return new Subscription(this, observer);
+            if (observer == null) throw new ArgumentNullException(nameof(observer));
+
+            lock (_syncRoot)
+            {
+                _observer.Add(observer);
+                return new Subscription(this, observer);
+            }
         }
 
         private class Subscription : IDisposable
@@ -85,9 +90,12 @@ namespace ReduxSharp
             {
                 lock (_lockObj)
                 {
-                    lock (_parent._syncRoot)
+                    if (_parent != null)
                     {
-                        _parent._observer.Remove(_target);
+                        lock (_parent._syncRoot)
+                        {
+                            _parent._observer.Remove(_target);
+                        }
                     }
                     _target = null;
                     _parent = null;
