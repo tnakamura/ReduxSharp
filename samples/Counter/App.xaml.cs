@@ -20,7 +20,7 @@ namespace Counter
         {
             var reducer = new CombinedReducer<AppState>(new CounterReducer());
             Store = new StoreBuilder<AppState>(reducer)
-                .InitialState(new AppState())
+                .UseInitialState(new AppState())
                 .Use(LoggerMiddleware.Invoke)
                 .Build();
         }
