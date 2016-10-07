@@ -1,4 +1,4 @@
-﻿namespace Counter
+﻿namespace RxCounter
 {
     public class AppState
     {

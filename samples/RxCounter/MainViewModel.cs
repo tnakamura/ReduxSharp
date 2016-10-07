@@ -1,13 +1,16 @@
 ﻿using System;
 using System.ComponentModel;
 
-namespace Counter
+namespace RxCounter
 {
-    public class MainViewModel : IObserver<AppState>, INotifyPropertyChanged
+    public class MainViewModel : INotifyPropertyChanged
     {
         public MainViewModel()
         {
-            App.Store.Subscribe(this);
+            App.Store.Subscribe(state =>
+            {
+                Count = state.Counter.Count;
+            });
         }
 
         private int count = 0;
@@ -33,21 +36,6 @@ namespace Counter
         public void CountDown()
         {
             App.Store.Dispatch(CountDownAction.Instance);
-        }
-
-        public void OnCompleted()
-        {
-            // 何もしない
-        }
-
-        public void OnError(Exception error)
-        {
-            // 何もしない
-        }
-
-        public void OnNext(AppState value)
-        {
-            Count = value.Counter.Count;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

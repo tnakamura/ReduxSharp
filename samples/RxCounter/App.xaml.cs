@@ -1,7 +1,7 @@
 ﻿using ReduxSharp;
 using System.Windows;
 
-namespace Counter
+namespace RxCounter
 {
     /// <summary>
     /// App.xaml の相互作用ロジック

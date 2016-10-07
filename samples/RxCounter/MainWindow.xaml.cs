@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace Counter
+namespace RxCounter
 {
     /// <summary>
     /// MainWindow.xaml の相互作用ロジック

@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ReduxSharp;
+﻿using ReduxSharp;
 
 namespace Counter
 {
-    public class CounterReducer : IReducer<AppState>
+    public class AppReducer : IReducer<AppState>
     {
         public AppState Invoke(AppState state, IAction action)
         {
@@ -32,5 +27,18 @@ namespace Counter
                 return state;
             }
         }
+    }
+    public class CountUpAction : IAction
+    {
+        private CountUpAction() { }
+
+        public static readonly CountUpAction Instance = new CountUpAction();
+    }
+
+    public class CountDownAction : IAction
+    {
+        private CountDownAction() { }
+
+        public static readonly CountDownAction Instance = new CountDownAction();
     }
 }
