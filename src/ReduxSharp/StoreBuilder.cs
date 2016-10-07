@@ -50,7 +50,7 @@ namespace ReduxSharp
         /// </summary>
         /// <param name="middleware">The middleware delegate.</param>
         /// <returns>The <see cref="IStoreBuilder{TState}"/>.</returns>
-        public IStoreBuilder<TState> Use(MiddlewareDelegate<TState> middleware)
+        public IStoreBuilder<TState> UseMiddleware(MiddlewareDelegate<TState> middleware)
         {
             if (middleware == null) throw new ArgumentNullException(nameof(middleware));
 

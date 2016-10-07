@@ -26,6 +26,6 @@
         /// </summary>
         /// <param name="middleware">The middleware delegate.</param>
         /// <returns>The <see cref="IStoreBuilder{TState}"/>.</returns>
-        IStoreBuilder<TState> Use(MiddlewareDelegate<TState> middleware);
+        IStoreBuilder<TState> UseMiddleware(MiddlewareDelegate<TState> middleware);
     }
 }
