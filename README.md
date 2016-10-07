@@ -36,6 +36,7 @@ public class AppReducer : IReducer<AppState>
 				Count = state.Count + 1
 			};
 		}
+
 		if (action is DecrementAction)
 		{
 			return new AppState()
@@ -43,10 +44,8 @@ public class AppReducer : IReducer<AppState>
 				Count = state.Count - 1
 			};
 		}
-		else
-		{
-			return state;
-		}
+
+    return state;
 	}
 }
 
