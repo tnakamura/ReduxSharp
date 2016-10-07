@@ -14,14 +14,15 @@ namespace Counter
     /// </summary>
     public partial class App : Application
     {
-        public static Store<AppState> Store { get; }
+        public static IStore<AppState> Store { get; }
 
         static App()
         {
-            Store = new Store<AppState>(
-                new CombinedReducer<AppState>(new CounterReducer()),
-                new AppState(),
-                LoggerMiddleware.Invoke);
+            var reducer = new CombinedReducer<AppState>(new CounterReducer());
+            Store = new StoreBuilder<AppState>(reducer)
+                .InitialState(new AppState())
+                .Use(LoggerMiddleware.Invoke)
+                .Build();
         }
     }
 }

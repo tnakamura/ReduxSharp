@@ -43,10 +43,12 @@
     <Compile Include="IAction.cs" />
     <Compile Include="IReducer.cs" />
     <Compile Include="IStore.cs" />
+    <Compile Include="IStoreBuilder.cs" />
     <Compile Include="ListObserver.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReduxInitAction.cs" />
     <Compile Include="Store.cs" />
+    <Compile Include="StoreBuilder.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
