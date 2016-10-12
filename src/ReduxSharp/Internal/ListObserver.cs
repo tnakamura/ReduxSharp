@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ReduxSharp
+namespace ReduxSharp.Internal
 {
     internal class ListObserver<T> : IObserver<T>
     {
