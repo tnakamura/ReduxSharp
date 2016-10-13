@@ -9,6 +9,15 @@ namespace ReduxSharp.Tests
 {
     public class StoreBuilderTest
     {
+        public class AppState { }
+
+        public class AppReducer : IReducer<AppState>
+        {
+            public AppState Invoke(AppState state, IAction action)
+            {
+                return state ?? new AppState();
+            }
+        }
 
         [Fact]
         public void Constructor_initialize_new_instance()
@@ -43,6 +52,18 @@ namespace ReduxSharp.Tests
                 .Build();
             Assert.Equal(1, options.Buffer.Count);
             Assert.Equal(typeof(ReduxInitAction).FullName, options.Buffer[0]);
+        }
+
+        [Fact]
+        public void UseMiddleware_add_middleware_that_no_options()
+        {
+            var options = new LoggerOptions();
+            var store = new StoreBuilder<AppState>(new AppReducer())
+                .UseDummy()
+                .UseLogger(options)
+                .Build();
+            Assert.Equal(1, options.Buffer.Count);
+            Assert.Equal(typeof(DummyAction).FullName, options.Buffer[0]);
         }
     }
 }
