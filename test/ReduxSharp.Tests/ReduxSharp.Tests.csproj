@@ -45,6 +45,11 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AppReducer.cs" />
+    <Compile Include="AppState.cs" />
+    <Compile Include="LoggerMiddleware.cs" />
+    <Compile Include="LoggerMiddlewareExtensions.cs" />
+    <Compile Include="LoggerOptions.cs" />
     <Compile Include="StoreBuilderTest.cs" />
     <Compile Include="StoreTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

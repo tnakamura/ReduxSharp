@@ -8,18 +8,6 @@ namespace ReduxSharp.Tests
 {
     public class StoreTest
     {
-        public class AppState
-        {
-        }
-
-        public class AppReducer : IReducer<AppState>
-        {
-            public AppState Invoke(AppState state, IAction action)
-            {
-                return state ?? new AppState();
-            }
-        }
-
         [Fact]
         public void Constructor_initialize_new_instance()
         {
