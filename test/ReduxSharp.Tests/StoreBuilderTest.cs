@@ -51,7 +51,7 @@ namespace ReduxSharp.Tests
                 .UseLogger(options)
                 .Build();
             Assert.Equal(1, options.Buffer.Count);
-            Assert.Equal(typeof(ReduxInitAction).FullName, options.Buffer[0]);
+            Assert.Equal(typeof(ReduxInitialAction).FullName, options.Buffer[0]);
         }
 
         [Fact]

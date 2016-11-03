@@ -44,7 +44,7 @@ namespace ReduxSharp
             }
             else
             {
-                _dispatch(new ReduxInitAction());
+                _dispatch(new ReduxInitialAction());
             }
         }
 
