@@ -48,6 +48,7 @@
     <Compile Include="Internal\ListObserver.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReduxInitialAction.cs" />
+    <Compile Include="StandardAction.cs" />
     <Compile Include="Store.cs" />
     <Compile Include="StoreBuilder.cs" />
   </ItemGroup>

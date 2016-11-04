@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="LoggerMiddleware.cs" />
+    <Compile Include="StandardActionTest.cs" />
     <Compile Include="StoreBuilderTest.cs" />
     <Compile Include="StoreTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
