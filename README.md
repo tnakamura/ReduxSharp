@@ -86,7 +86,7 @@ namespace ReduxSharpSample
 
 ## License
 
-[MTI](https://opensource.org/licenses/MIT)
+[MIT](https://opensource.org/licenses/MIT)
 
 
 ## Author
