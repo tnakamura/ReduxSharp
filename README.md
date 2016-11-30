@@ -3,14 +3,17 @@
 Unidirectional Data Flow in C# - Inspired by Redux
 
 
-## Installation
+## Install
+
+First, [install Nuget](http://docs.nuget.org/docs/start-here/installing-nuget).
+Then, install [ReduxSharp](http://www.nuget.org/packages/ReduxSharp) from the package manager console:
 
 ```
 PM> Install-Package ReduxSharp
 ```
 
 
-## Using
+## Usage
 
 ```cs
 using System;
@@ -72,11 +75,21 @@ namespace ReduxSharpSample
 ```
 
 
-## Contributing
+## Contribution
 
 1. Fork it
 2. Create your feature branch ( git checkout -b my-new-feature )
 3. Commit your changes ( git commit -am 'Add some feature' )
 4. Push to the branch ( git push origin my-new-feature )
 5. Create new Pull Request
+
+
+## License
+
+[MTI](https://opensource.org/licenses/MIT)
+
+
+## Author
+
+[tnakamura](https://github.com/tnakamura)
 
