@@ -17,6 +17,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{578D6939-F
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReduxSharp.Tests", "test\ReduxSharp.Tests\ReduxSharp.Tests.csproj", "{0387927D-98D8-4645-A218-AE90943E448F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TodoList", "samples\TodoList\TodoList.csproj", "{2DB0EC1B-5BB4-4C52-886B-A2B50AF87C10}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{0387927D-98D8-4645-A218-AE90943E448F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0387927D-98D8-4645-A218-AE90943E448F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0387927D-98D8-4645-A218-AE90943E448F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2DB0EC1B-5BB4-4C52-886B-A2B50AF87C10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2DB0EC1B-5BB4-4C52-886B-A2B50AF87C10}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2DB0EC1B-5BB4-4C52-886B-A2B50AF87C10}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2DB0EC1B-5BB4-4C52-886B-A2B50AF87C10}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -48,5 +54,6 @@ Global
 		{D12DBDCD-9F4A-447A-881A-9D33F758F7C2} = {C90B8933-E545-41F2-BB12-037B0922C389}
 		{454251DA-14E9-4179-B0AA-16CF01D5D773} = {C90B8933-E545-41F2-BB12-037B0922C389}
 		{0387927D-98D8-4645-A218-AE90943E448F} = {578D6939-F620-4762-8184-D92C108B16F0}
+		{2DB0EC1B-5BB4-4C52-886B-A2B50AF87C10} = {C90B8933-E545-41F2-BB12-037B0922C389}
 	EndGlobalSection
 EndGlobal
