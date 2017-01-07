@@ -6,7 +6,7 @@
         <authors>tnakamura</authors>
         <owners>tnakamura</owners>
         <projectUrl>https://github.com/tnakamura/ReduxSharp</projectUrl>
-        <licenseUrl>http://opensource.org/licenses/MIT</licenseUrl>
+        <licenseUrl>https://raw.githubusercontent.com/tnakamura/ReduxSharp/master/LICENSE</licenseUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Unidirectional Data Flow in C# - Inspired by Redux</description>
         <language>en-US</language>
