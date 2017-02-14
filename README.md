@@ -15,6 +15,8 @@ PM> Install-Package ReduxSharp
 
 ## Usage
 
+### State
+
 ```cs
 using System;
 using ReduxSharp;
@@ -25,11 +27,31 @@ namespace ReduxSharpSample
     {
         public int Count { get; set; } = 0;
     }
+}
+```
 
+### Actions
+
+```cs
+using System;
+using ReduxSharp;
+
+namespace ReduxSharpSample
+{
     public class IncrementAction : IAction {}
 
     public class DecrementAction : IAction {}
+}
+```
 
+### Reducers
+
+```cs
+using System;
+using ReduxSharp;
+
+namespace ReduxSharpSample
+{
     public class AppReducer : IReducer<AppState>
     {
         public AppState Invoke(AppState state, IAction action)
@@ -53,7 +75,17 @@ namespace ReduxSharpSample
             return state;
         }
     }
+}
+```
 
+### Store
+
+```c#
+using System;
+using ReduxSharp;
+
+namespace ReduxSharpSample
+{
     class Program
     {
         static void Main(string[] args)
