@@ -22,7 +22,6 @@ namespace ReduxSharp
         /// <param name="action">
         /// An object describing the change that makes sense for your application.
         /// </param>
-        /// <returns>The dispatched action</returns>
-        IAction Dispatch(IAction action);
+        void Dispatch(IAction action);
     }
 }

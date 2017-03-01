@@ -19,10 +19,10 @@ namespace ReduxSharp.Tests
             _options = options;
         }
 
-        public IAction Invoke(IAction action)
+        public void Invoke(IAction action)
         {
             _options.Buffer.Add(action.GetType().FullName);
-            return _next(action);
+            _next(action);
         }
     }
     public class LoggerOptions

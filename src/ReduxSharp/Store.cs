@@ -71,23 +71,20 @@ namespace ReduxSharp
         /// <param name="action">
         /// An object describing the change that makes sense for your application.
         /// </param>
-        /// <returns>The dispatched action</returns>
-        public IAction Dispatch(IAction action)
+        public void Dispatch(IAction action)
         {
             if (action == null) throw new ArgumentNullException(nameof(action));
 
-            return _dispatch(action);
+            _dispatch(action);
         }
 
-        private IAction InternalDispatch(IAction action)
+        private void InternalDispatch(IAction action)
         {
             lock (_syncRoot)
             {
                 var nextState = State = _reducer.Invoke(State, action);
                 _observer.OnNext(nextState);
             }
-
-            return action;
         }
 
         /// <summary>
@@ -149,8 +146,7 @@ namespace ReduxSharp
     /// <param name="action">
     /// An object describing the change that makes sense for your application.
     /// </param>
-    /// <returns>The dispatched action</returns>
-    public delegate IAction DispatchDelegate(IAction action);
+    public delegate void DispatchDelegate(IAction action);
 
     /// <summary>
     /// A higher-order function that composes a dispatch function to return a new dispatch function.

@@ -17,9 +17,9 @@ namespace ReduxSharp.Tests
             _next = next;
         }
 
-        public IAction Invoke(IAction action)
+        public void Invoke(IAction action)
         {
-            return _next(new DummyAction());
+            _next(new DummyAction());
         }
     }
 

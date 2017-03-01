@@ -34,14 +34,11 @@ namespace ReduxSharp.Internal
 
                 var factory = Compile<object>(invokeMethod, invokeParameters);
 
-                return action =>
-                {
-                    return factory(instance, action);
-                };
+                return action => factory(instance, action);
             };
         }
 
-        private static Func<T, IAction, IAction> Compile<T>(MethodInfo methodInfo, ParameterInfo[] parameters)
+        private static Action<T, IAction> Compile<T>(MethodInfo methodInfo, ParameterInfo[] parameters)
         {
             var middleware = typeof(T);
             var actionArg = Expression.Parameter(typeof(IAction), "action");
@@ -59,7 +56,7 @@ namespace ReduxSharp.Internal
 
             var body = Expression.Call(middleweareInstanceArg, methodInfo, methodArguments);
 
-            var lambda = Expression.Lambda<Func<T, IAction, IAction>>(body, instanceArg, actionArg);
+            var lambda = Expression.Lambda<Action<T, IAction>>(body, instanceArg, actionArg);
 
             return lambda.Compile();
         }
