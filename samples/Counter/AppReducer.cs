@@ -28,16 +28,17 @@ namespace Counter
             }
         }
     }
+
     public class CountUpAction : IAction
     {
-        private CountUpAction() { }
+        CountUpAction() { }
 
         public static readonly CountUpAction Instance = new CountUpAction();
     }
 
     public class CountDownAction : IAction
     {
-        private CountDownAction() { }
+        CountDownAction() { }
 
         public static readonly CountDownAction Instance = new CountDownAction();
     }

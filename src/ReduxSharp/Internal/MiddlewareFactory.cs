@@ -6,7 +6,7 @@ namespace ReduxSharp.Internal
 {
     internal static class MiddlewareFactory
     {
-        private const string InvokeMethodName = "Invoke";
+        const string InvokeMethodName = "Invoke";
 
         public static MiddlewareDelegate<TState> Create<TState>(Type middleware, object[] args)
         {
@@ -38,7 +38,7 @@ namespace ReduxSharp.Internal
             };
         }
 
-        private static Action<T, IAction> Compile<T>(MethodInfo methodInfo, ParameterInfo[] parameters)
+        static Action<T, IAction> Compile<T>(MethodInfo methodInfo, ParameterInfo[] parameters)
         {
             var middleware = typeof(T);
             var actionArg = Expression.Parameter(typeof(IAction), "action");

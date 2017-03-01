@@ -11,13 +11,13 @@ namespace ReduxSharp
     /// <typeparam name="TState">A type of root state tree</typeparam>
     public class Store<TState> : IStore<TState>
     {
-        private readonly object _syncRoot = new object();
+        readonly object _syncRoot = new object();
 
-        private readonly IReducer<TState> _reducer;
+        readonly IReducer<TState> _reducer;
 
-        private readonly ListObserver<TState> _observer = new ListObserver<TState>();
+        readonly ListObserver<TState> _observer = new ListObserver<TState>();
 
-        private readonly DispatchDelegate _dispatch;
+        readonly DispatchDelegate _dispatch;
 
         /// <summary>
         /// Initializes a new instance of <see cref="Store{TState}"/> class.
@@ -53,7 +53,7 @@ namespace ReduxSharp
         /// </summary>
         public TState State { get; private set; }
 
-        private DispatchDelegate ApplyMiddlewares(IEnumerable<MiddlewareDelegate<TState>> middlewares)
+        DispatchDelegate ApplyMiddlewares(IEnumerable<MiddlewareDelegate<TState>> middlewares)
         {
             return middlewares
                 .Reverse()
@@ -78,7 +78,7 @@ namespace ReduxSharp
             _dispatch(action);
         }
 
-        private void InternalDispatch(IAction action)
+        void InternalDispatch(IAction action)
         {
             lock (_syncRoot)
             {
@@ -108,13 +108,13 @@ namespace ReduxSharp
             }
         }
 
-        private class Subscription : IDisposable
+        class Subscription : IDisposable
         {
-            private readonly object _lockObj = new object();
+            readonly object _lockObj = new object();
 
-            private Store<TState> _parent;
+            Store<TState> _parent;
 
-            private IObserver<TState> _target;
+            IObserver<TState> _target;
 
             public Subscription(Store<TState> parent, IObserver<TState> target)
             {

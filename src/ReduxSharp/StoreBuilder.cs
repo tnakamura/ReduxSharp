@@ -15,12 +15,12 @@ namespace ReduxSharp
     /// <typeparam name="TState">A type of root state tree</typeparam>
     public class StoreBuilder<TState> : IStoreBuilder<TState>
     {
-        private readonly IReducer<TState> _reducer;
+        readonly IReducer<TState> _reducer;
 
-        private readonly List<MiddlewareDelegate<TState>> _middlewares
+        readonly List<MiddlewareDelegate<TState>> _middlewares
             = new List<MiddlewareDelegate<TState>>();
 
-        private TState _initialState = default(TState);
+        TState _initialState = default(TState);
 
         /// <summary>
         /// Initializes a new instance of <see cref="StoreBuilder{TState}"/> class.

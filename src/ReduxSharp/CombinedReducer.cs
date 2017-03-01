@@ -12,7 +12,7 @@ namespace ReduxSharp
     /// <typeparam name="TState"></typeparam>
     public class CombinedReducer<TState> : IReducer<TState>
     {
-        private readonly IReducer<TState>[] reducers;
+        readonly IReducer<TState>[] reducers;
 
         /// <summary>
         /// Initializes a new instance of <see cref="CombinedReducer{TState}"/> class.

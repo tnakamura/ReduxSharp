@@ -8,9 +8,9 @@ namespace ReduxSharp.Tests
 {
     public class LoggerMiddleware<TState>
     {
-        private readonly IStore<TState> _store;
-        private readonly DispatchDelegate _next;
-        private readonly LoggerOptions _options;
+        readonly IStore<TState> _store;
+        readonly DispatchDelegate _next;
+        readonly LoggerOptions _options;
 
         public LoggerMiddleware(IStore<TState> store, DispatchDelegate next, LoggerOptions options)
         {
@@ -25,6 +25,7 @@ namespace ReduxSharp.Tests
             _next(action);
         }
     }
+
     public class LoggerOptions
     {
         public List<string> Buffer { get; set; } = new List<string>();

@@ -8,7 +8,7 @@ namespace ReduxSharp.Internal
 {
     internal class ListObserver<T> : IObserver<T>
     {
-        private readonly List<IObserver<T>> _observers;
+        readonly List<IObserver<T>> _observers;
 
         public ListObserver()
         {

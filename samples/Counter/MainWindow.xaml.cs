@@ -14,18 +14,18 @@ namespace Counter
             ViewModel = new MainViewModel();
         }
 
-        private MainViewModel ViewModel
+        MainViewModel ViewModel
         {
             get { return (MainViewModel)DataContext; }
             set { DataContext = value; }
         }
 
-        private void OnCountUp(object sender, RoutedEventArgs e)
+        void OnCountUp(object sender, RoutedEventArgs e)
         {
             ViewModel.CountUp();
         }
 
-        private void OnCountDown(object sender, RoutedEventArgs e)
+        void OnCountDown(object sender, RoutedEventArgs e)
         {
             ViewModel.CountDown();
         }

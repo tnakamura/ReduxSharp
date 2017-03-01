@@ -13,14 +13,14 @@ namespace TodoList
 {
     public class MainViewModel : ViewModel, IObserver<AppState>
     {
-        private IDisposable _subscription;
+        IDisposable _subscription;
 
         public MainViewModel()
         {
             _subscription = App.Store.Subscribe(this);
         }
 
-        private string _newTodo;
+        string _newTodo;
 
         public string NewTodo
         {
@@ -30,7 +30,7 @@ namespace TodoList
 
         public ObservableCollection<TodoViewModel> Todos { get; } = new ObservableCollection<TodoViewModel>();
 
-        private ICommand _addCommand;
+        ICommand _addCommand;
 
         public ICommand AddCommand
         {
@@ -78,7 +78,7 @@ namespace TodoList
 
         public string Id { get; set; }
 
-        private string _text;
+        string _text;
 
         public string Text
         {
@@ -86,7 +86,7 @@ namespace TodoList
             set { SetProperty(ref _text, value); }
         }
 
-        private ICommand _completeCommand;
+        ICommand _completeCommand;
 
         public ICommand CompleteCommand
         {
@@ -100,7 +100,7 @@ namespace TodoList
             }
         }
 
-        private ICommand _deleteCommand;
+        ICommand _deleteCommand;
 
         public ICommand DeleteCommand
         {

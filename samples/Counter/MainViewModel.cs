@@ -10,7 +10,7 @@ namespace Counter
             App.Store.Subscribe(this);
         }
 
-        private int count = 0;
+        int count = 0;
 
         public int Count
         {
@@ -52,7 +52,7 @@ namespace Counter
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private void OnPropertyChanged(string propertyName)
+        void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }

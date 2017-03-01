@@ -81,7 +81,7 @@ namespace TodoList
             return state;
         }
 
-        private TodoManager AddTodo(TodoManager state, AddTodoAction action)
+        TodoManager AddTodo(TodoManager state, AddTodoAction action)
         {
             var newTodos = new List<Todo>(state.Todos);
             newTodos.Add(new Todo() { Text = action.Todo });
@@ -91,7 +91,7 @@ namespace TodoList
             };
         }
 
-        private TodoManager CompleteTodo(TodoManager state, CompleteTodoAction action)
+        TodoManager CompleteTodo(TodoManager state, CompleteTodoAction action)
         {
             var newTodos = state.Todos.Select(t => new Todo
             {
@@ -105,7 +105,7 @@ namespace TodoList
             };
         }
 
-        private TodoManager DeleteTodo(TodoManager state, DeleteTodoAction action)
+        TodoManager DeleteTodo(TodoManager state, DeleteTodoAction action)
         {
             var newTodos = state.Todos.Where(t => t.Id != action.TodoId).ToList();
             return new TodoManager()
