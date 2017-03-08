@@ -8,13 +8,13 @@ namespace ReduxSharp.Tests
 {
     public class LoggerMiddleware<TState>
     {
-        readonly IStore<TState> _store;
+        readonly Func<TState> _getState;
         readonly DispatchDelegate _next;
         readonly LoggerOptions _options;
 
-        public LoggerMiddleware(IStore<TState> store, DispatchDelegate next, LoggerOptions options)
+        public LoggerMiddleware(Func<TState> getState, DispatchDelegate next, LoggerOptions options)
         {
-            _store = store;
+            _getState = getState;
             _next = next;
             _options = options;
         }

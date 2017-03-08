@@ -8,12 +8,12 @@ namespace ReduxSharp.Tests
 {
     public class DummyMiddleware<TState>
     {
-        readonly IStore<TState> _store;
+        readonly Func<TState> _getState;
         readonly DispatchDelegate _next;
 
-        public DummyMiddleware(IStore<TState> store, DispatchDelegate next)
+        public DummyMiddleware(Func<TState> getState, DispatchDelegate next)
         {
-            _store = store;
+            _getState = getState;
             _next = next;
         }
 
