@@ -65,19 +65,18 @@ namespace TodoList
     {
         public AppState Invoke(AppState state, IAction action)
         {
-            if (action is AddTodoAction)
+            switch (action)
             {
-                state.TodoManager = AddTodo(state.TodoManager, (AddTodoAction)action);
+                case AddTodoAction a:
+                    state.TodoManager = AddTodo(state.TodoManager, a);
+                    break;
+                case CompleteTodoAction a:
+                    state.TodoManager = CompleteTodo(state.TodoManager, a);
+                    break;
+                case DeleteTodoAction a:
+                    state.TodoManager = DeleteTodo(state.TodoManager, a);
+                    break;
             }
-            else if (action is CompleteTodoAction)
-            {
-                state.TodoManager = CompleteTodo(state.TodoManager, (CompleteTodoAction)action);
-            }
-            else if (action is DeleteTodoAction)
-            {
-                state.TodoManager = DeleteTodo(state.TodoManager, (DeleteTodoAction)action);
-            }
-
             return state;
         }
 
