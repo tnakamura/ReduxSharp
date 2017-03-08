@@ -12,7 +12,7 @@ namespace ReduxSharp
     /// <typeparam name="TState"></typeparam>
     public class CombinedReducer<TState> : IReducer<TState>
     {
-        readonly IReducer<TState>[] reducers;
+        readonly IReducer<TState>[] _reducers;
 
         /// <summary>
         /// Initializes a new instance of <see cref="CombinedReducer{TState}"/> class.
@@ -20,9 +20,7 @@ namespace ReduxSharp
         /// <param name="reducers">the list of reducers</param>
         public CombinedReducer(params IReducer<TState>[] reducers)
         {
-            if (reducers == null) throw new ArgumentNullException(nameof(reducers));
-
-            this.reducers = reducers;
+            _reducers = reducers ?? throw new ArgumentNullException(nameof(reducers));
         }
 
         /// <summary>
@@ -33,7 +31,7 @@ namespace ReduxSharp
         /// <returns>A new state object</returns>
         public TState Invoke(TState state, IAction action)
         {
-            return reducers.Aggregate(state, (currentState, reducer) => reducer.Invoke(currentState, action));
+            return _reducers.Aggregate(state, (currentState, reducer) => reducer.Invoke(currentState, action));
         }
     }
 }

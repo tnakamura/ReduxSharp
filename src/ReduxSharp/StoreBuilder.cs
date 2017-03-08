@@ -30,9 +30,7 @@ namespace ReduxSharp
         /// </param>
         public StoreBuilder(IReducer<TState> reducer)
         {
-            if (reducer == null) throw new ArgumentNullException(nameof(reducer));
-
-            _reducer = reducer;
+            _reducer = reducer ?? throw new ArgumentNullException(nameof(reducer));
         }
 
         /// <summary>

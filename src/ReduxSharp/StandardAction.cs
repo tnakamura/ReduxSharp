@@ -18,9 +18,7 @@ namespace ReduxSharp
         /// <param name="payload">Payload convertable to JSON</param>
         public StandardAction(string type, IDictionary<string, object> payload = null)
         {
-            if (type == null) throw new ArgumentNullException(nameof(type));
-
-            Type = type;
+            Type = type ?? throw new ArgumentNullException(nameof(type));
             Payload = payload;
         }
 

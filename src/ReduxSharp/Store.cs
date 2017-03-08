@@ -33,9 +33,7 @@ namespace ReduxSharp
         /// </param>
         public Store(IReducer<TState> reducer, TState initialState = default(TState), params MiddlewareDelegate<TState>[] middlewares)
         {
-            if (reducer == null) throw new ArgumentNullException(nameof(reducer));
-
-            _reducer = reducer;
+            _reducer = reducer ?? throw new ArgumentNullException(nameof(reducer));
             _dispatch = ApplyMiddlewares(middlewares);
 
             if (initialState != null)
@@ -55,7 +53,11 @@ namespace ReduxSharp
 
         DispatchDelegate ApplyMiddlewares(IEnumerable<MiddlewareDelegate<TState>> middlewares)
         {
-            Func<TState> getState = () => State;
+            TState getState()
+            {
+                return State;
+            }
+
             return middlewares
                 .Reverse()
                 .Aggregate<MiddlewareDelegate<TState>, DispatchDelegate>(
