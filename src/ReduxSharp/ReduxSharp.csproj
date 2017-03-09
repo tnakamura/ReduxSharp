@@ -40,12 +40,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CombinedReducer.cs" />
+    <Compile Include="DispatchDelegate.cs" />
     <Compile Include="IAction.cs" />
     <Compile Include="Internal\MiddlewareFactory.cs" />
     <Compile Include="IReducer.cs" />
     <Compile Include="IStore.cs" />
     <Compile Include="IStoreBuilder.cs" />
     <Compile Include="Internal\ListObserver.cs" />
+    <Compile Include="MiddlewareDelegate.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReduxInitialAction.cs" />
     <Compile Include="StandardAction.cs" />
