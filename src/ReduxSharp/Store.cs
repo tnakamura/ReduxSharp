@@ -53,16 +53,11 @@ namespace ReduxSharp
 
         DispatchDelegate ApplyMiddlewares(IEnumerable<MiddlewareDelegate<TState>> middlewares)
         {
-            TState getState()
-            {
-                return State;
-            }
-
             return middlewares
                 .Reverse()
                 .Aggregate<MiddlewareDelegate<TState>, DispatchDelegate>(
                     InternalDispatch,
-                    (next, middleware) => middleware(getState, next));
+                    (next, middleware) => middleware(this, next));
         }
 
         /// <summary>
