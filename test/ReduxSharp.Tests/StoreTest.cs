@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,13 +11,23 @@ namespace ReduxSharp.Tests
     {
         public class AppState
         {
+            public int Count { get; set; }
+
+            public class IncrementAction : IAction { }
         }
 
         public class AppReducer : IReducer<AppState>
         {
             public AppState Invoke(AppState state, IAction action)
             {
-                return state ?? new AppState();
+                state = state ?? new AppState() { Count = 0 };
+
+                if (action is AppState.IncrementAction)
+                {
+                    state.Count += 1;
+                }
+
+                return state;
             }
         }
 
@@ -44,6 +55,19 @@ namespace ReduxSharp.Tests
             {
                 store.Dispatch(null);
             });
+        }
+
+        [Fact]
+        public async Task Dispatch_should_be_thread_safe()
+        {
+            var store = new Store<AppState>(new AppReducer(), new AppState());
+
+            await Task.WhenAll(Enumerable.Range(0, 1000).Select(_ => Task.Run(() =>
+              {
+                  store.Dispatch(new AppState.IncrementAction());
+              })));
+
+            Assert.Equal(1000, store.State.Count);
         }
     }
 }
