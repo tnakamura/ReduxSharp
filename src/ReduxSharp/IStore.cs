@@ -23,5 +23,7 @@ namespace ReduxSharp
         /// An object describing the change that makes sense for your application.
         /// </param>
         void Dispatch(IAction action);
+
+        void Dispatch(ActionCreatorDelegate<TState> actionCreator);
     }
 }

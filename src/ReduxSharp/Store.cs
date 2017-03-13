@@ -85,6 +85,17 @@ namespace ReduxSharp
             }
         }
 
+        public void Dispatch(ActionCreatorDelegate<TState> actionCreator)
+        {
+            if (actionCreator == null) throw new ArgumentNullException(nameof(actionCreator));
+
+            var action = actionCreator(State, this);
+            if (action != null)
+            {
+                Dispatch(action);
+            }
+        }
+
         /// <summary>
         /// Notifies the provider that an observer is to receive notifications.
         /// </summary>

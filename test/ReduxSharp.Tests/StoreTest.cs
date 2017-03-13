@@ -53,7 +53,7 @@ namespace ReduxSharp.Tests
             var store = new Store<AppState>(new AppReducer());
             Assert.Throws<ArgumentNullException>(() =>
             {
-                store.Dispatch(null);
+                store.Dispatch(default(IAction));
             });
         }
 
