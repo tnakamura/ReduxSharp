@@ -86,6 +86,12 @@ namespace ReduxSharp
             }
         }
 
+        /// <summary>
+        /// Dispatches an action creator.
+        /// </summary>
+        /// <param name="actionCreator">
+        /// A function that creates an action.
+        /// </param>
         public void Dispatch(ActionCreatorDelegate<TState> actionCreator)
         {
             if (actionCreator == null) throw new ArgumentNullException(nameof(actionCreator));
@@ -97,6 +103,13 @@ namespace ReduxSharp
             }
         }
 
+        /// <summary>
+        /// Dispatches an async action creator.
+        /// </summary>
+        /// <param name="asyncActionCreator">
+        /// A function that creates and dispatches actions asynchronously.
+        /// </param>
+        /// <returns>A task that represents the asynchronous dispatch actions.</returns>
         public async Task Dispatch(AsyncActionCreatorDelegate<TState> asyncActionCreator)
         {
             if (asyncActionCreator == null) throw new ArgumentNullException(nameof(asyncActionCreator));
