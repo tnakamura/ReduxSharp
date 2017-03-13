@@ -16,6 +16,27 @@ namespace ReduxSharp.Tests
             public class IncrementAction : IAction { }
         }
 
+        public static class AppActionCreators
+        {
+            public static ActionCreatorDelegate<AppState> Increment()
+            {
+                return (state, store) =>
+                {
+                    return new AppState.IncrementAction();
+                };
+            }
+
+            public static AsyncActionCreatorDelegate<AppState> IncrementTwice()
+            {
+                return async (state, store, callback) =>
+                {
+                    callback(Increment());
+                    await Task.Delay(10);
+                    callback(Increment());
+                };
+            }
+        }
+
         public class AppReducer : IReducer<AppState>
         {
             public AppState Invoke(AppState state, IAction action)
@@ -32,14 +53,14 @@ namespace ReduxSharp.Tests
         }
 
         [Fact]
-        public void Constructor_initialize_new_instance()
+        public void ConstructorTest()
         {
             var store = new Store<AppState>(new AppReducer());
             Assert.NotNull(store);
         }
 
         [Fact]
-        public void Constructor_throws_ArgumentNullException_when_reducer_is_null()
+        public void ConstructorNullReducerTest()
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
@@ -48,7 +69,7 @@ namespace ReduxSharp.Tests
         }
 
         [Fact]
-        public void Dispatch_throws_ArgumentNullException_when_action_is_null()
+        public void DispatchNullActiontest()
         {
             var store = new Store<AppState>(new AppReducer());
             Assert.Throws<ArgumentNullException>(() =>
@@ -58,7 +79,53 @@ namespace ReduxSharp.Tests
         }
 
         [Fact]
-        public async Task Dispatch_should_be_thread_safe()
+        public void DispatchActionTest()
+        {
+            var store = new Store<AppState>(new AppReducer());
+            store.Dispatch(new AppState.IncrementAction());
+            Assert.Equal(1, store.State.Count);
+        }
+
+        [Fact]
+        public void DispatchActionCreatorTest()
+        {
+            var store = new Store<AppState>(new AppReducer());
+            store.Dispatch(AppActionCreators.Increment());
+            Assert.Equal(1, store.State.Count);
+        }
+
+        [Fact]
+        public async Task DispatchAsyncActionCreatorTest()
+        {
+            var store = new Store<AppState>(new AppReducer());
+            await store.Dispatch(AppActionCreators.IncrementTwice());
+            Assert.Equal(2, store.State.Count);
+        }
+
+        [Fact]
+        public void DispatchNullActionCreatorTest()
+        {
+            var store = new Store<AppState>(new AppReducer());
+            ActionCreatorDelegate<AppState> actionCreator = null;
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                store.Dispatch(actionCreator);
+            });
+        }
+
+        [Fact]
+        public async Task DispatchNullAsyncActionCreatorTest()
+        {
+            var store = new Store<AppState>(new AppReducer());
+            AsyncActionCreatorDelegate<AppState> asyncActionCreator = null;
+            await Assert.ThrowsAsync<ArgumentNullException>(async () =>
+            {
+                await store.Dispatch(asyncActionCreator);
+            });
+        }
+
+        [Fact]
+        public async Task DispatchThreadSafeTest()
         {
             var store = new Store<AppState>(new AppReducer(), new AppState());
 
