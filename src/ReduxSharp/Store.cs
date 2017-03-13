@@ -9,7 +9,7 @@ namespace ReduxSharp
     /// A store that holds the complete state tree of your application.
     /// </summary>
     /// <typeparam name="TState">A type of root state tree</typeparam>
-    public class Store<TState> : IStore<TState>
+    public partial class Store<TState> : IStore<TState>
     {
         readonly object _syncRoot = new object();
 
@@ -103,37 +103,6 @@ namespace ReduxSharp
             {
                 _observer.Add(observer);
                 return new Subscription(this, observer);
-            }
-        }
-
-        class Subscription : IDisposable
-        {
-            readonly object _lockObj = new object();
-
-            Store<TState> _parent;
-
-            IObserver<TState> _target;
-
-            public Subscription(Store<TState> parent, IObserver<TState> target)
-            {
-                _parent = parent;
-                _target = target;
-            }
-
-            public void Dispose()
-            {
-                lock (_lockObj)
-                {
-                    if (_parent != null)
-                    {
-                        lock (_parent._syncRoot)
-                        {
-                            _parent._observer.Remove(_target);
-                        }
-                    }
-                    _target = null;
-                    _parent = null;
-                }
             }
         }
     }
