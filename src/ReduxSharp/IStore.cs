@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace ReduxSharp
 {
@@ -25,5 +26,7 @@ namespace ReduxSharp
         void Dispatch(IAction action);
 
         void Dispatch(ActionCreatorDelegate<TState> actionCreator);
+
+        Task Dispatch(AsyncActionCreatorDelegate<TState> asyncActionCreator);
     }
 }

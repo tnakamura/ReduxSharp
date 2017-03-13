@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace ReduxSharp
 {
@@ -94,6 +95,13 @@ namespace ReduxSharp
             {
                 Dispatch(action);
             }
+        }
+
+        public async Task Dispatch(AsyncActionCreatorDelegate<TState> asyncActionCreator)
+        {
+            if (asyncActionCreator == null) throw new ArgumentNullException(nameof(asyncActionCreator));
+
+            await asyncActionCreator(State, this, Dispatch).ConfigureAwait(false);
         }
 
         /// <summary>

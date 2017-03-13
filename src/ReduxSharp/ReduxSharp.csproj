@@ -40,6 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ActionCreatorDelegate.cs" />
+    <Compile Include="AsyncActionCreatorDelegate.cs" />
     <Compile Include="CombinedReducer.cs" />
     <Compile Include="DispatchDelegate.cs" />
     <Compile Include="IAction.cs" />
