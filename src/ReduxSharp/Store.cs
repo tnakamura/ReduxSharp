@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace ReduxSharp
 {
@@ -83,6 +84,37 @@ namespace ReduxSharp
                 var nextState = State = _reducer.Invoke(State, action);
                 _observer.OnNext(nextState);
             }
+        }
+
+        /// <summary>
+        /// Dispatches an action creator.
+        /// </summary>
+        /// <param name="actionCreator">
+        /// A function that creates an action.
+        /// </param>
+        public void Dispatch(ActionCreatorDelegate<TState> actionCreator)
+        {
+            if (actionCreator == null) throw new ArgumentNullException(nameof(actionCreator));
+
+            var action = actionCreator(State, this);
+            if (action != null)
+            {
+                Dispatch(action);
+            }
+        }
+
+        /// <summary>
+        /// Dispatches an async action creator.
+        /// </summary>
+        /// <param name="asyncActionCreator">
+        /// A function that creates and dispatches actions asynchronously.
+        /// </param>
+        /// <returns>A task that represents the asynchronous dispatch actions.</returns>
+        public async Task Dispatch(AsyncActionCreatorDelegate<TState> asyncActionCreator)
+        {
+            if (asyncActionCreator == null) throw new ArgumentNullException(nameof(asyncActionCreator));
+
+            await asyncActionCreator(State, this, Dispatch).ConfigureAwait(false);
         }
 
         /// <summary>
