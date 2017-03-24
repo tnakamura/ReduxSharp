@@ -7,5 +7,5 @@
     /// <param name="state">A state object</param>
     /// <param name="store">A store</param>
     /// <returns>An action object</returns>
-    public delegate IAction ActionCreatorDelegate<TState>(TState state, IStore<TState> store);
+    public delegate IAction ActionCreator<TState>(TState state, IStore<TState> store);
 }

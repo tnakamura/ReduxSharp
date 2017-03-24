@@ -18,7 +18,7 @@ namespace ReduxSharp
 
         readonly ListObserver<TState> _observer = new ListObserver<TState>();
 
-        readonly DispatchDelegate _dispatch;
+        readonly DispatchFunction _dispatch;
 
         /// <summary>
         /// Initializes a new instance of <see cref="Store{TState}"/> class.
@@ -32,7 +32,7 @@ namespace ReduxSharp
         /// <param name="middlewares">
         /// Functions that conform to the Redux middleware API.
         /// </param>
-        public Store(IReducer<TState> reducer, TState initialState = default(TState), params MiddlewareDelegate<TState>[] middlewares)
+        public Store(IReducer<TState> reducer, TState initialState = default(TState), params Middleware<TState>[] middlewares)
         {
             _reducer = reducer ?? throw new ArgumentNullException(nameof(reducer));
             _dispatch = ApplyMiddlewares(middlewares);
@@ -52,11 +52,11 @@ namespace ReduxSharp
         /// </summary>
         public TState State { get; private set; }
 
-        DispatchDelegate ApplyMiddlewares(IEnumerable<MiddlewareDelegate<TState>> middlewares)
+        DispatchFunction ApplyMiddlewares(IEnumerable<Middleware<TState>> middlewares)
         {
             return middlewares
                 .Reverse()
-                .Aggregate<MiddlewareDelegate<TState>, DispatchDelegate>(
+                .Aggregate<Middleware<TState>, DispatchFunction>(
                     InternalDispatch,
                     (next, middleware) => middleware(this, next));
         }
@@ -92,7 +92,7 @@ namespace ReduxSharp
         /// <param name="actionCreator">
         /// A function that creates an action.
         /// </param>
-        public void Dispatch(ActionCreatorDelegate<TState> actionCreator)
+        public void Dispatch(ActionCreator<TState> actionCreator)
         {
             if (actionCreator == null) throw new ArgumentNullException(nameof(actionCreator));
 
@@ -110,7 +110,7 @@ namespace ReduxSharp
         /// A function that creates and dispatches actions asynchronously.
         /// </param>
         /// <returns>A task that represents the asynchronous dispatch actions.</returns>
-        public async Task Dispatch(AsyncActionCreatorDelegate<TState> asyncActionCreator)
+        public async Task Dispatch(AsyncActionCreator<TState> asyncActionCreator)
         {
             if (asyncActionCreator == null) throw new ArgumentNullException(nameof(asyncActionCreator));
 

@@ -6,5 +6,5 @@
     /// <param name="action">
     /// An object describing the change that makes sense for your application.
     /// </param>
-    public delegate void DispatchDelegate(IAction action);
+    public delegate void DispatchFunction(IAction action);
 }

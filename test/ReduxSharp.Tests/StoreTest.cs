@@ -18,7 +18,7 @@ namespace ReduxSharp.Tests
 
         public static class AppActionCreators
         {
-            public static ActionCreatorDelegate<AppState> Increment()
+            public static ActionCreator<AppState> Increment()
             {
                 return (state, store) =>
                 {
@@ -26,7 +26,7 @@ namespace ReduxSharp.Tests
                 };
             }
 
-            public static AsyncActionCreatorDelegate<AppState> IncrementTwice()
+            public static AsyncActionCreator<AppState> IncrementTwice()
             {
                 return async (state, store, callback) =>
                 {
@@ -106,7 +106,7 @@ namespace ReduxSharp.Tests
         public void DispatchNullActionCreatorTest()
         {
             var store = new Store<AppState>(new AppReducer());
-            ActionCreatorDelegate<AppState> actionCreator = null;
+            ActionCreator<AppState> actionCreator = null;
             Assert.Throws<ArgumentNullException>(() =>
             {
                 store.Dispatch(actionCreator);
@@ -117,7 +117,7 @@ namespace ReduxSharp.Tests
         public async Task DispatchNullAsyncActionCreatorTest()
         {
             var store = new Store<AppState>(new AppReducer());
-            AsyncActionCreatorDelegate<AppState> asyncActionCreator = null;
+            AsyncActionCreator<AppState> asyncActionCreator = null;
             await Assert.ThrowsAsync<ArgumentNullException>(async () =>
             {
                 await store.Dispatch(asyncActionCreator);

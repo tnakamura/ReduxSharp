@@ -17,8 +17,8 @@ namespace ReduxSharp
     {
         readonly IReducer<TState> _reducer;
 
-        readonly List<MiddlewareDelegate<TState>> _middlewares
-            = new List<MiddlewareDelegate<TState>>();
+        readonly List<Middleware<TState>> _middlewares
+            = new List<Middleware<TState>>();
 
         TState _initialState = default(TState);
 
@@ -51,7 +51,7 @@ namespace ReduxSharp
         /// </summary>
         /// <param name="middleware">The middleware delegate.</param>
         /// <returns>The <see cref="IStoreBuilder{TState}"/> instance.</returns>
-        public IStoreBuilder<TState> UseMiddleware(MiddlewareDelegate<TState> middleware)
+        public IStoreBuilder<TState> UseMiddleware(Middleware<TState> middleware)
         {
             if (middleware == null) throw new ArgumentNullException(nameof(middleware));
 

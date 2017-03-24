@@ -12,10 +12,10 @@ namespace ReduxSharp
     /// <typeparam name="TState">A type of root state tree</typeparam>
     /// <param name="state">A state object</param>
     /// <param name="store">A store</param>
-    /// <param name="callback">A dispatch function</param>
+    /// <param name="actionCreatorCallback">A dispatch function</param>
     /// <returns>A task that represents the asynchronous dispatch actions.</returns>
-    public delegate Task AsyncActionCreatorDelegate<TState>(
+    public delegate Task AsyncActionCreator<TState>(
         TState state,
         IStore<TState> store,
-        Action<ActionCreatorDelegate<TState>> callback);
+        Action<ActionCreator<TState>> actionCreatorCallback);
 }

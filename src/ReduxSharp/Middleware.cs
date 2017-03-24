@@ -9,5 +9,5 @@ namespace ReduxSharp
     /// <param name="store">A store</param>
     /// <param name="next">A dispatch function</param>
     /// <returns>A new dispatch function</returns>
-    public delegate DispatchDelegate MiddlewareDelegate<TState>(IStore<TState> store, DispatchDelegate next);
+    public delegate DispatchFunction Middleware<TState>(IStore<TState> store, DispatchFunction next);
 }

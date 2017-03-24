@@ -8,7 +8,7 @@ namespace ReduxSharp.Internal
     {
         const string InvokeMethodName = "Invoke";
 
-        public static MiddlewareDelegate<TState> Create<TState>(Type middleware, object[] args)
+        public static Middleware<TState> Create<TState>(Type middleware, object[] args)
         {
             return (store, next) =>
             {

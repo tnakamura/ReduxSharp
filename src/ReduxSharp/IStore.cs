@@ -28,7 +28,7 @@ namespace ReduxSharp
         /// <param name="actionCreator">
         /// A function that creates an action.
         /// </param>
-        void Dispatch(ActionCreatorDelegate<TState> actionCreator);
+        void Dispatch(ActionCreator<TState> actionCreator);
 
         /// <summary>
         /// Dispatches an async action creator.
@@ -37,6 +37,6 @@ namespace ReduxSharp
         /// A function that creates and dispatches actions asynchronously.
         /// </param>
         /// <returns>A task that represents the asynchronous dispatch actions.</returns>
-        Task Dispatch(AsyncActionCreatorDelegate<TState> asyncActionCreator);
+        Task Dispatch(AsyncActionCreator<TState> asyncActionCreator);
     }
 }

@@ -28,7 +28,7 @@ namespace ReduxSharp
         /// </summary>
         /// <param name="middleware">The middleware delegate.</param>
         /// <returns>The <see cref="IStoreBuilder{TState}"/>.</returns>
-        IStoreBuilder<TState> UseMiddleware(MiddlewareDelegate<TState> middleware);
+        IStoreBuilder<TState> UseMiddleware(Middleware<TState> middleware);
 
         /// <summary>
         /// Adds a middleware type to the store's dispatch pipeline.
