@@ -41,16 +41,15 @@
   <ItemGroup>
     <Compile Include="ActionCreator.cs" />
     <Compile Include="AsyncActionCreator.cs" />
-    <Compile Include="CombinedReducer.cs" />
     <Compile Include="DispatchFunction.cs" />
     <Compile Include="IAction.cs" />
     <Compile Include="Internal\MiddlewareFactory.cs" />
-    <Compile Include="IReducer.cs" />
     <Compile Include="IStore.cs" />
     <Compile Include="IStoreBuilder.cs" />
     <Compile Include="Internal\ListObserver.cs" />
     <Compile Include="Middleware.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Reducer.cs" />
     <Compile Include="ReduxInitialAction.cs" />
     <Compile Include="StandardAction.cs" />
     <Compile Include="Store.cs" />

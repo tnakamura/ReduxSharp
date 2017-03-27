@@ -61,9 +61,9 @@ namespace TodoList
         public string TodoId { get; }
     }
 
-    public class TodoManagerReducer : IReducer<AppState>
+    public static class TodoManagerReducer
     {
-        public AppState Invoke(AppState state, IAction action)
+        public static AppState Invoke(AppState state, IAction action)
         {
             switch (action)
             {
@@ -80,7 +80,7 @@ namespace TodoList
             return state;
         }
 
-        TodoManager AddTodo(TodoManager state, AddTodoAction action)
+        static TodoManager AddTodo(TodoManager state, AddTodoAction action)
         {
             var newTodos = new List<Todo>(state.Todos);
             newTodos.Add(new Todo() { Text = action.Todo });
@@ -90,7 +90,7 @@ namespace TodoList
             };
         }
 
-        TodoManager CompleteTodo(TodoManager state, CompleteTodoAction action)
+        static TodoManager CompleteTodo(TodoManager state, CompleteTodoAction action)
         {
             var newTodos = state.Todos.Select(t => new Todo
             {
@@ -104,7 +104,7 @@ namespace TodoList
             };
         }
 
-        TodoManager DeleteTodo(TodoManager state, DeleteTodoAction action)
+        static TodoManager DeleteTodo(TodoManager state, DeleteTodoAction action)
         {
             var newTodos = state.Todos.Where(t => t.Id != action.TodoId).ToList();
             return new TodoManager()

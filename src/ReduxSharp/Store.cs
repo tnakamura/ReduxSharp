@@ -14,7 +14,7 @@ namespace ReduxSharp
     {
         readonly object _syncRoot = new object();
 
-        readonly IReducer<TState> _reducer;
+        readonly Reducer<TState> _reducer;
 
         readonly ListObserver<TState> _observer = new ListObserver<TState>();
 
@@ -24,7 +24,7 @@ namespace ReduxSharp
         /// Initializes a new instance of <see cref="Store{TState}"/> class.
         /// </summary>
         /// <param name="reducer">
-        /// A reducing object that returns the next state tree.
+        /// A reducing function that returns the next state tree.
         /// </param>
         /// <param name="initialState">
         /// The initial state.
@@ -32,7 +32,7 @@ namespace ReduxSharp
         /// <param name="middlewares">
         /// Functions that conform to the Redux middleware API.
         /// </param>
-        public Store(IReducer<TState> reducer, TState initialState = default(TState), params Middleware<TState>[] middlewares)
+        public Store(Reducer<TState> reducer, TState initialState = default(TState), params Middleware<TState>[] middlewares)
         {
             _reducer = reducer ?? throw new ArgumentNullException(nameof(reducer));
             _dispatch = ApplyMiddlewares(middlewares);
@@ -81,7 +81,7 @@ namespace ReduxSharp
         {
             lock (_syncRoot)
             {
-                var nextState = State = _reducer.Invoke(State, action);
+                var nextState = State = _reducer(State, action);
                 _observer.OnNext(nextState);
             }
         }
