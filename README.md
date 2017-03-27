@@ -52,9 +52,9 @@ using ReduxSharp;
 
 namespace ReduxSharpSample
 {
-    public class AppReducer : IReducer<AppState>
+    public static class AppReducer
     {
-        public AppState Invoke(AppState state, IAction action)
+        public static AppState Invoke(AppState state, IAction action)
         {
             if (action is IncrementAction)
             {
@@ -90,7 +90,7 @@ namespace ReduxSharpSample
     {
         static void Main(string[] args)
         {
-            IStore<AppState> store = new StoreBuilder<AppState>(new AppReducer())
+            IStore<AppState> store = new StoreBuilder<AppState>(AppReducer.Invoke)
                 .UseInitialState(new AppState())
                 .Build();
 
