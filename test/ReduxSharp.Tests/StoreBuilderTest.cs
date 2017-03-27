@@ -11,9 +11,9 @@ namespace ReduxSharp.Tests
     {
         public class AppState { }
 
-        public class AppReducer : IReducer<AppState>
+        public static class AppReducer
         {
-            public AppState Invoke(AppState state, IAction action)
+            public static AppState Invoke(AppState state, IAction action)
             {
                 return state ?? new AppState();
             }
@@ -22,7 +22,7 @@ namespace ReduxSharp.Tests
         [Fact]
         public void Constructor_initialize_new_instance()
         {
-            var builder = new StoreBuilder<AppState>(new AppReducer());
+            var builder = new StoreBuilder<AppState>(AppReducer.Invoke);
             Assert.NotNull(builder);
         }
 
@@ -38,7 +38,7 @@ namespace ReduxSharp.Tests
         [Fact]
         public void Build_returns_new_store_instance()
         {
-            var builder = new StoreBuilder<AppState>(new AppReducer());
+            var builder = new StoreBuilder<AppState>(AppReducer.Invoke);
             var store = builder.Build();
             Assert.NotNull(store);
         }
@@ -47,7 +47,7 @@ namespace ReduxSharp.Tests
         public void UseMiddleware_add_class_type_middleware_to_store()
         {
             var options = new LoggerOptions();
-            var store = new StoreBuilder<AppState>(new AppReducer())
+            var store = new StoreBuilder<AppState>(AppReducer.Invoke)
                 .UseLogger(options)
                 .Build();
             Assert.Equal(1, options.Buffer.Count);
@@ -58,7 +58,7 @@ namespace ReduxSharp.Tests
         public void UseMiddleware_add_middleware_that_no_options()
         {
             var options = new LoggerOptions();
-            var store = new StoreBuilder<AppState>(new AppReducer())
+            var store = new StoreBuilder<AppState>(AppReducer.Invoke)
                 .UseDummy()
                 .UseLogger(options)
                 .Build();

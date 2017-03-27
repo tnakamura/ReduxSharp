@@ -2,9 +2,9 @@
 
 namespace RxCounter
 {
-    public class AppReducer : IReducer<AppState>
+    public static class AppReducer
     {
-        public AppState Invoke(AppState state, IAction action)
+        public static AppState Invoke(AppState state, IAction action)
         {
             if (action is CountUpAction)
             {

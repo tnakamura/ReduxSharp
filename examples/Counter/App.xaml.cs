@@ -12,8 +12,7 @@ namespace Counter
 
         static App()
         {
-            var reducer = new CombinedReducer<AppState>(new AppReducer());
-            Store = new StoreBuilder<AppState>(reducer)
+            Store = new StoreBuilder<AppState>(AppReducer.Invoke)
                 .UseInitialState(new AppState())
                 .Build();
         }

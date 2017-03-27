@@ -18,8 +18,7 @@ namespace TodoList
 
         static App()
         {
-            var reducer = new CombinedReducer<AppState>(new TodoManagerReducer());
-            Store = new StoreBuilder<AppState>(reducer)
+            Store = new StoreBuilder<AppState>(TodoManagerReducer.Invoke)
                 .UseInitialState(new AppState())
                 .Build();
         }

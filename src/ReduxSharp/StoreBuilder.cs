@@ -15,7 +15,7 @@ namespace ReduxSharp
     /// <typeparam name="TState">A type of root state tree</typeparam>
     public class StoreBuilder<TState> : IStoreBuilder<TState>
     {
-        readonly IReducer<TState> _reducer;
+        readonly Reducer<TState> _reducer;
 
         readonly List<Middleware<TState>> _middlewares
             = new List<Middleware<TState>>();
@@ -26,9 +26,9 @@ namespace ReduxSharp
         /// Initializes a new instance of <see cref="StoreBuilder{TState}"/> class.
         /// </summary>
         /// <param name="reducer">
-        /// A reducing object that returns the next state tree.
+        /// A reducing function that returns the next state tree.
         /// </param>
-        public StoreBuilder(IReducer<TState> reducer)
+        public StoreBuilder(Reducer<TState> reducer)
         {
             _reducer = reducer ?? throw new ArgumentNullException(nameof(reducer));
         }
