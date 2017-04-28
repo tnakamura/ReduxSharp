@@ -136,5 +136,101 @@ namespace ReduxSharp.Tests
 
             Assert.Equal(1000, store.State.Count);
         }
+
+        [Fact]
+        public void DispatchHandleExceptionTest()
+        {
+            AppState Reducer(AppState state, IAction action)
+            {
+                if (action is StandardAction std && std.Type == "test")
+                {
+                    throw new NotSupportedException();
+                }
+                return state ?? new AppState();
+            }
+
+            var store = new Store<AppState>(Reducer, new AppState());
+
+            Exception actual = null;
+            var observer = new ActionObserver<AppState>()
+            {
+                Error = (error) =>
+                {
+                    actual = error;
+                }
+            };
+            store.Subscribe(observer);
+
+            store.Dispatch(new StandardAction("test"));
+
+            Assert.NotNull(actual);
+            Assert.IsType<NotSupportedException>(actual);
+        }
+
+        [Fact]
+        public void DispatchActionCreatorHandleExceptionTest()
+        {
+            AppState Reducer(AppState state, IAction action)
+            {
+                if (action is StandardAction std && std.Type == "test")
+                {
+                    throw new NotSupportedException();
+                }
+                return state ?? new AppState();
+            }
+
+            var store = new Store<AppState>(Reducer, new AppState());
+
+            Exception actual = null;
+            var observer = new ActionObserver<AppState>()
+            {
+                Error = (error) =>
+                {
+                    actual = error;
+                }
+            };
+            store.Subscribe(observer);
+
+            store.Dispatch((_, __) => new StandardAction("test"));
+
+            Assert.NotNull(actual);
+            Assert.IsType<NotSupportedException>(actual);
+        }
+
+        [Fact]
+        public async Task DispatchAsyncActionCreatorHandleExceptionTest()
+        {
+            AppState Reducer(AppState state, IAction action)
+            {
+                if (action is StandardAction std && std.Type == "test")
+                {
+                    throw new NotSupportedException();
+                }
+                return state ?? new AppState();
+            }
+
+            var asyncActionCreator = new AsyncActionCreator<AppState>(async (_, __, callback) =>
+              {
+                  await Task.FromResult(0);
+                  callback((x, y) => new StandardAction("test"));
+              });
+
+            var store = new Store<AppState>(Reducer, new AppState());
+
+            Exception actual = null;
+            var observer = new ActionObserver<AppState>()
+            {
+                Error = (error) =>
+                {
+                    actual = error;
+                }
+            };
+            store.Subscribe(observer);
+
+            await store.Dispatch(asyncActionCreator);
+
+            Assert.NotNull(actual);
+            Assert.IsType<NotSupportedException>(actual);
+        }
     }
 }

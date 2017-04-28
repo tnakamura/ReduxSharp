@@ -74,7 +74,14 @@ namespace ReduxSharp
         {
             if (action == null) throw new ArgumentNullException(nameof(action));
 
-            _dispatch(action);
+            try
+            {
+                _dispatch(action);
+            }
+            catch (Exception ex)
+            {
+                _observer.OnError(ex);
+            }
         }
 
         void InternalDispatch(IAction action)
@@ -96,10 +103,17 @@ namespace ReduxSharp
         {
             if (actionCreator == null) throw new ArgumentNullException(nameof(actionCreator));
 
-            var action = actionCreator(State, this);
-            if (action != null)
+            try
             {
-                Dispatch(action);
+                var action = actionCreator(State, this);
+                if (action != null)
+                {
+                    _dispatch(action);
+                }
+            }
+            catch (Exception ex)
+            {
+                _observer.OnError(ex);
             }
         }
 
@@ -114,7 +128,21 @@ namespace ReduxSharp
         {
             if (asyncActionCreator == null) throw new ArgumentNullException(nameof(asyncActionCreator));
 
-            await asyncActionCreator(State, this, Dispatch).ConfigureAwait(false);
+            try
+            {
+                await asyncActionCreator(State, this, actionCreator =>
+                {
+                    var action = actionCreator(State, this);
+                    if (action != null)
+                    {
+                        _dispatch(action);
+                    }
+                }).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                _observer.OnError(ex);
+            }
         }
 
         /// <summary>

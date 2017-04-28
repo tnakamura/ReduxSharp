@@ -45,6 +45,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ActionObserver.cs" />
     <Compile Include="LoggerMiddleware.cs" />
     <Compile Include="StandardActionTest.cs" />
     <Compile Include="StoreBuilderTest.cs" />
