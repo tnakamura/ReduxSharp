@@ -18,7 +18,7 @@ namespace ReduxSharp
 
         readonly ListObserver<TState> _observer = new ListObserver<TState>();
 
-        readonly DispatchFunction _dispatch;
+        readonly Dispatcher _dispatcher;
 
         /// <summary>
         /// Initializes a new instance of <see cref="Store{TState}"/> class.
@@ -35,7 +35,7 @@ namespace ReduxSharp
         public Store(Reducer<TState> reducer, TState initialState = default(TState), params Middleware<TState>[] middlewares)
         {
             _reducer = reducer ?? throw new ArgumentNullException(nameof(reducer));
-            _dispatch = ApplyMiddlewares(middlewares);
+            _dispatcher = ApplyMiddlewares(middlewares);
 
             if (initialState != null)
             {
@@ -43,7 +43,7 @@ namespace ReduxSharp
             }
             else
             {
-                _dispatch(new ReduxInitialAction());
+                _dispatcher(new ReduxInitialAction());
             }
         }
 
@@ -52,11 +52,11 @@ namespace ReduxSharp
         /// </summary>
         public TState State { get; private set; }
 
-        DispatchFunction ApplyMiddlewares(IEnumerable<Middleware<TState>> middlewares)
+        Dispatcher ApplyMiddlewares(IEnumerable<Middleware<TState>> middlewares)
         {
             return middlewares
                 .Reverse()
-                .Aggregate<Middleware<TState>, DispatchFunction>(
+                .Aggregate<Middleware<TState>, Dispatcher>(
                     InternalDispatch,
                     (next, middleware) => middleware(this, next));
         }
@@ -76,7 +76,7 @@ namespace ReduxSharp
 
             try
             {
-                _dispatch(action);
+                _dispatcher(action);
             }
             catch (Exception ex)
             {
@@ -108,7 +108,7 @@ namespace ReduxSharp
                 var action = actionCreator(State, this);
                 if (action != null)
                 {
-                    _dispatch(action);
+                    _dispatcher(action);
                 }
             }
             catch (Exception ex)
@@ -135,7 +135,7 @@ namespace ReduxSharp
                     var action = actionCreator(State, this);
                     if (action != null)
                     {
-                        _dispatch(action);
+                        _dispatcher(action);
                     }
                 }).ConfigureAwait(false);
             }

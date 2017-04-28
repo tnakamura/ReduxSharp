@@ -41,7 +41,7 @@
   <ItemGroup>
     <Compile Include="ActionCreator.cs" />
     <Compile Include="AsyncActionCreator.cs" />
-    <Compile Include="DispatchFunction.cs" />
+    <Compile Include="Dispatcher.cs" />
     <Compile Include="IAction.cs" />
     <Compile Include="Internal\MiddlewareFactory.cs" />
     <Compile Include="IStore.cs" />
