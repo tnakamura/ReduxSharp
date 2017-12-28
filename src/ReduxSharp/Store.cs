@@ -94,58 +94,6 @@ namespace ReduxSharp
         }
 
         /// <summary>
-        /// Dispatches an action creator.
-        /// </summary>
-        /// <param name="actionCreator">
-        /// A function that creates an action.
-        /// </param>
-        public void Dispatch(ActionCreator<TState> actionCreator)
-        {
-            if (actionCreator == null) throw new ArgumentNullException(nameof(actionCreator));
-
-            try
-            {
-                var action = actionCreator(State, this);
-                if (action != null)
-                {
-                    _dispatcher(action);
-                }
-            }
-            catch (Exception ex)
-            {
-                _observer.OnError(ex);
-            }
-        }
-
-        /// <summary>
-        /// Dispatches an async action creator.
-        /// </summary>
-        /// <param name="asyncActionCreator">
-        /// A function that creates and dispatches actions asynchronously.
-        /// </param>
-        /// <returns>A task that represents the asynchronous dispatch actions.</returns>
-        public async Task Dispatch(AsyncActionCreator<TState> asyncActionCreator)
-        {
-            if (asyncActionCreator == null) throw new ArgumentNullException(nameof(asyncActionCreator));
-
-            try
-            {
-                await asyncActionCreator(State, this, actionCreator =>
-                {
-                    var action = actionCreator(State, this);
-                    if (action != null)
-                    {
-                        _dispatcher(action);
-                    }
-                }).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                _observer.OnError(ex);
-            }
-        }
-
-        /// <summary>
         /// Notifies the provider that an observer is to receive notifications.
         /// </summary>
         /// <param name="observer">
