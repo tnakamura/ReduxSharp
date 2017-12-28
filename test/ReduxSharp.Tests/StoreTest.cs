@@ -198,6 +198,35 @@ namespace ReduxSharp.Tests
         }
 
         [Fact]
+        public void DispatchActionCreatorThatThrowsExcepitionHandleExceptionTest()
+        {
+            AppState Reducer(AppState state, IAction action)
+            {
+                return state ?? new AppState();
+            }
+
+            var store = new Store<AppState>(Reducer, new AppState());
+
+            Exception actual = null;
+            var observer = new ActionObserver<AppState>()
+            {
+                Error = (error) =>
+                {
+                    actual = error;
+                }
+            };
+            store.Subscribe(observer);
+
+            store.Dispatch((_, __) =>
+            {
+                throw new NotSupportedException();
+            });
+
+            Assert.NotNull(actual);
+            Assert.IsType<NotSupportedException>(actual);
+        }
+
+        [Fact]
         public async Task DispatchAsyncActionCreatorHandleExceptionTest()
         {
             AppState Reducer(AppState state, IAction action)
@@ -214,6 +243,38 @@ namespace ReduxSharp.Tests
                   await Task.FromResult(0);
                   callback((x, y) => new StandardAction("test"));
               });
+
+            var store = new Store<AppState>(Reducer, new AppState());
+
+            Exception actual = null;
+            var observer = new ActionObserver<AppState>()
+            {
+                Error = (error) =>
+                {
+                    actual = error;
+                }
+            };
+            store.Subscribe(observer);
+
+            await store.Dispatch(asyncActionCreator);
+
+            Assert.NotNull(actual);
+            Assert.IsType<NotSupportedException>(actual);
+        }
+
+        [Fact]
+        public async Task DispatchAsyncActionCreatorThatThrowsExcepitionHandleExceptionTest()
+        {
+            AppState Reducer(AppState state, IAction action)
+            {
+                return state ?? new AppState();
+            }
+
+            var asyncActionCreator = new AsyncActionCreator<AppState>(async (_, __, callback) =>
+            {
+                await Task.Yield();
+                throw new NotSupportedException();
+            });
 
             var store = new Store<AppState>(Reducer, new AppState());
 
