@@ -1,16 +1,21 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Reactive.Linq;
 
 namespace RxCounter
 {
     public class MainViewModel : INotifyPropertyChanged
     {
+        readonly IDisposable _subscription;
+
         public MainViewModel()
         {
-            App.Store.Subscribe(state =>
-            {
-                Count = state.Counter.Count;
-            });
+            _subscription = App.Store
+                .Select(s => s.Counter)
+                .Subscribe(s =>
+                {
+                    Count = s.Count;
+                });
         }
 
         int count = 0;
