@@ -1,25 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ReduxSharp.Tests
+﻿namespace ReduxSharp.Tests
 {
     public class DummyMiddleware<TState>
     {
-        readonly IStore<TState> _store;
-        readonly Dispatcher _next;
+        readonly IStore<TState> store;
+        readonly Dispatcher next;
 
         public DummyMiddleware(IStore<TState> store, Dispatcher next)
         {
-            _store = store;
-            _next = next;
+            this.store = store;
+            this.next = next;
         }
 
         public void Invoke(IAction action)
         {
-            _next(new DummyAction());
+            next(new DummyAction());
         }
     }
 

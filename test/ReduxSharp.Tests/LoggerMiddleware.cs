@@ -1,28 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace ReduxSharp.Tests
 {
     public class LoggerMiddleware<TState>
     {
-        readonly IStore<TState> _store;
-        readonly Dispatcher _next;
-        readonly LoggerOptions _options;
+        readonly IStore<TState> store;
+        readonly Dispatcher next;
+        readonly LoggerOptions options;
 
         public LoggerMiddleware(IStore<TState> store, Dispatcher next, LoggerOptions options)
         {
-            _store = store;
-            _next = next;
-            _options = options;
+            this.store = store;
+            this.next = next;
+            this.options = options;
         }
 
         public void Invoke(IAction action)
         {
-            _options.Buffer.Add(action.GetType().FullName);
-            _next(action);
+            options.Buffer.Add(action.GetType().FullName);
+            next(action);
         }
     }
 
