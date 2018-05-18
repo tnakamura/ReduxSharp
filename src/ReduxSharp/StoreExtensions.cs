@@ -1,25 +1,78 @@
-﻿using System;
+﻿using ReduxSharp.Internal;
+using System;
 using System.Collections.Generic;
-using System.Text;
-using ReduxSharp.Internal;
 
 namespace ReduxSharp
 {
+    /// <summary>
+    /// Provides a set of static methods for writing in-memory queries over observable
+    /// sequences.
+    /// </summary>
     public static class StoreExtensions
     {
-        public static IObservable<T> DistinctUntilChanged<T>(this IObservable<T> source)
+        /// <summary>
+        /// Returns an observable sequence that contains only distinct contiguous elements.
+        /// </summary>
+        /// <typeparam name="TSource">
+        /// The type of the elements in the source sequence.
+        /// </typeparam>
+        /// <param name="source">
+        /// An observable sequence to retain distinct contiguous elements for.
+        /// </param>
+        /// <returns>
+        /// An observable sequence only containing the distinct contiguous elements from
+        /// the source sequence.
+        /// </returns>
+        public static IObservable<TSource> DistinctUntilChanged<TSource>(this IObservable<TSource> source)
         {
-            return new DistinctUntilChangedObservable<T>(source, EqualityComparer<T>.Default);
+            return source.DistinctUntilChanged(EqualityComparer<TSource>.Default);
         }
 
-        public static IObservable<T> DistinctUntilChanged<T>(this IObservable<T> source, IEqualityComparer<T> comparer)
+        /// <summary>
+        /// Returns an observable sequence that contains only distinct contiguous elements
+        /// according to the comparer.
+        /// </summary>
+        /// <typeparam name="TSource">
+        /// The type of the elements in the source sequence.
+        /// </typeparam>
+        /// <param name="source">
+        /// An observable sequence to retain distinct contiguous elements for.
+        /// </param>
+        /// <param name="comparer">
+        /// Equality comparer for source elements.
+        /// </param>
+        /// <returns>
+        /// An observable sequence only containing the distinct contiguous elements from
+        /// the source sequence.
+        /// </returns>
+        public static IObservable<TSource> DistinctUntilChanged<TSource>(this IObservable<TSource> source, IEqualityComparer<TSource> comparer)
         {
-            return new DistinctUntilChangedObservable<T>(source, comparer);
+            return new DistinctUntilChangedObservable<TSource>(source, comparer);
         }
 
-        public static IObservable<TResult> Select<T, TResult>(this IObservable<T> source, Func<T, TResult> selector)
+        /// <summary>
+        /// Projects each element of an observable sequence into a new form.
+        /// </summary>
+        /// <typeparam name="TSource">
+        /// The type of the elements in the source sequence.
+        /// </typeparam>
+        /// <typeparam name="TResult">
+        /// The type of the elements in the result sequence, obtained by running the selector
+        /// function for each element in the source sequence.
+        /// </typeparam>
+        /// <param name="source">
+        /// A sequence of elements to invoke a transform function on.
+        /// </param>
+        /// <param name="selector">
+        /// A transform function to apply to each source element.
+        /// </param>
+        /// <returns>
+        /// An observable sequence whose elements are the result of invoking the transform
+        /// function on each element of source.
+        /// </returns>
+        public static IObservable<TResult> Select<TSource, TResult>(this IObservable<TSource> source, Func<TSource, TResult> selector)
         {
-            return new SelectObservable<T, TResult>(source, selector);
+            return new SelectObservable<TSource, TResult>(source, selector);
         }
     }
 }
