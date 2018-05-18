@@ -8,16 +8,16 @@ namespace ReduxSharp.Internal
 {
     internal class ListObserver<T> : IObserver<T>
     {
-        readonly List<IObserver<T>> _observers;
+        readonly List<IObserver<T>> observers;
 
         public ListObserver()
         {
-            _observers = new List<IObserver<T>>();
+            observers = new List<IObserver<T>>();
         }
 
         public void OnCompleted()
         {
-            foreach (var observer in _observers)
+            foreach (var observer in observers)
             {
                 observer.OnCompleted();
             }
@@ -25,7 +25,7 @@ namespace ReduxSharp.Internal
 
         public void OnError(Exception error)
         {
-            foreach (var observer in _observers)
+            foreach (var observer in observers)
             {
                 observer.OnError(error);
             }
@@ -33,7 +33,7 @@ namespace ReduxSharp.Internal
 
         public void OnNext(T value)
         {
-            foreach (var observer in _observers)
+            foreach (var observer in observers)
             {
                 observer.OnNext(value);
             }
@@ -41,13 +41,13 @@ namespace ReduxSharp.Internal
 
         public IObserver<T> Add(IObserver<T> observer)
         {
-            _observers.Add(observer);
+            observers.Add(observer);
             return this;
         }
 
         public IObserver<T> Remove(IObserver<T> observer)
         {
-            _observers.Remove(observer);
+            observers.Remove(observer);
             return this;
         }
     }

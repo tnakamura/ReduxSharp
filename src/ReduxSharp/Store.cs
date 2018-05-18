@@ -12,13 +12,13 @@ namespace ReduxSharp
     /// <typeparam name="TState">A type of root state tree</typeparam>
     public partial class Store<TState> : IStore<TState>
     {
-        readonly object _syncRoot = new object();
+        readonly object syncRoot = new object();
 
-        readonly Reducer<TState> _reducer;
+        readonly Reducer<TState> reducer;
 
-        readonly ListObserver<TState> _observer = new ListObserver<TState>();
+        readonly ListObserver<TState> observer = new ListObserver<TState>();
 
-        readonly Dispatcher _dispatcher;
+        readonly Dispatcher dispatcher;
 
         /// <summary>
         /// Initializes a new instance of <see cref="Store{TState}"/> class.
@@ -34,8 +34,8 @@ namespace ReduxSharp
         /// </param>
         public Store(Reducer<TState> reducer, TState initialState = default(TState), params Middleware<TState>[] middlewares)
         {
-            _reducer = reducer ?? throw new ArgumentNullException(nameof(reducer));
-            _dispatcher = ApplyMiddlewares(middlewares);
+            this.reducer = reducer ?? throw new ArgumentNullException(nameof(reducer));
+            dispatcher = ApplyMiddlewares(middlewares);
 
             if (initialState != null)
             {
@@ -43,7 +43,7 @@ namespace ReduxSharp
             }
             else
             {
-                _dispatcher(new ReduxInitialAction());
+                dispatcher(new ReduxInitialAction());
             }
         }
 
@@ -76,20 +76,20 @@ namespace ReduxSharp
 
             try
             {
-                _dispatcher(action);
+                dispatcher(action);
             }
             catch (Exception ex)
             {
-                _observer.OnError(ex);
+                observer.OnError(ex);
             }
         }
 
         void InternalDispatch(IAction action)
         {
-            lock (_syncRoot)
+            lock (syncRoot)
             {
-                var nextState = State = _reducer(State, action);
-                _observer.OnNext(nextState);
+                var nextState = State = reducer(State, action);
+                observer.OnNext(nextState);
             }
         }
 
@@ -108,12 +108,12 @@ namespace ReduxSharp
                 var action = actionCreator(State, this);
                 if (action != null)
                 {
-                    _dispatcher(action);
+                    dispatcher(action);
                 }
             }
             catch (Exception ex)
             {
-                _observer.OnError(ex);
+                observer.OnError(ex);
             }
         }
 
@@ -135,13 +135,13 @@ namespace ReduxSharp
                     var action = actionCreator(State, this);
                     if (action != null)
                     {
-                        _dispatcher(action);
+                        dispatcher(action);
                     }
                 }).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                _observer.OnError(ex);
+                observer.OnError(ex);
             }
         }
 
@@ -159,9 +159,9 @@ namespace ReduxSharp
         {
             if (observer == null) throw new ArgumentNullException(nameof(observer));
 
-            lock (_syncRoot)
+            lock (syncRoot)
             {
-                _observer.Add(observer);
+                this.observer.Add(observer);
                 return new Subscription(this, observer);
             }
         }

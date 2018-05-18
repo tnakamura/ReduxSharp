@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
-namespace ReduxSharp.Internal
+namespace ReduxSharp.Linq
 {
     internal class DistinctUntilChangedObservable<T> : IObservable<T>
     {

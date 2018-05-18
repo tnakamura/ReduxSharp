@@ -6,31 +6,31 @@ namespace ReduxSharp
     {
         class Subscription : IDisposable
         {
-            readonly object _lockObj = new object();
+            readonly object lockObj = new object();
 
-            Store<TState> _parent;
+            Store<TState> parent;
 
-            IObserver<TState> _target;
+            IObserver<TState> target;
 
             public Subscription(Store<TState> parent, IObserver<TState> target)
             {
-                _parent = parent;
-                _target = target;
+                this.parent = parent;
+                this.target = target;
             }
 
             public void Dispose()
             {
-                lock (_lockObj)
+                lock (lockObj)
                 {
-                    if (_parent != null)
+                    if (parent != null)
                     {
-                        lock (_parent._syncRoot)
+                        lock (parent.syncRoot)
                         {
-                            _parent._observer.Remove(_target);
+                            parent.observer.Remove(target);
                         }
                     }
-                    _target = null;
-                    _parent = null;
+                    target = null;
+                    parent = null;
                 }
             }
         }

@@ -1,11 +1,6 @@
-﻿using System;
-using System.Reflection;
+﻿using ReduxSharp.Internal;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
-using ReduxSharp.Internal;
 
 namespace ReduxSharp
 {
@@ -15,12 +10,12 @@ namespace ReduxSharp
     /// <typeparam name="TState">A type of root state tree</typeparam>
     public class StoreBuilder<TState> : IStoreBuilder<TState>
     {
-        readonly Reducer<TState> _reducer;
+        readonly Reducer<TState> reducer;
 
-        readonly List<Middleware<TState>> _middlewares
+        readonly List<Middleware<TState>> middlewares
             = new List<Middleware<TState>>();
 
-        TState _initialState = default(TState);
+        TState initialState = default(TState);
 
         /// <summary>
         /// Initializes a new instance of <see cref="StoreBuilder{TState}"/> class.
@@ -30,7 +25,7 @@ namespace ReduxSharp
         /// </param>
         public StoreBuilder(Reducer<TState> reducer)
         {
-            _reducer = reducer ?? throw new ArgumentNullException(nameof(reducer));
+            this.reducer = reducer ?? throw new ArgumentNullException(nameof(reducer));
         }
 
         /// <summary>
@@ -42,7 +37,7 @@ namespace ReduxSharp
         /// <returns>The <see cref="IStoreBuilder{TState}"/>.</returns>
         public IStoreBuilder<TState> UseInitialState(TState initialState)
         {
-            _initialState = initialState;
+            this.initialState = initialState;
             return this;
         }
 
@@ -55,7 +50,7 @@ namespace ReduxSharp
         {
             if (middleware == null) throw new ArgumentNullException(nameof(middleware));
 
-            _middlewares.Add(middleware);
+            middlewares.Add(middleware);
             return this;
         }
 
@@ -65,7 +60,7 @@ namespace ReduxSharp
         /// <returns>The <see cref="IStore{TState}"/>.</returns>
         public IStore<TState> Build()
         {
-            return new Store<TState>(_reducer, _initialState, _middlewares.ToArray());
+            return new Store<TState>(reducer, initialState, middlewares.ToArray());
         }
 
         /// <summary>

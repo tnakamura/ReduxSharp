@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Threading.Tasks;
+using ReduxSharp.Linq;
 using System.Collections.Generic;
 using Xunit;
 
 namespace ReduxSharp.Tests
 {
-    public class StoreExtensionsTest
+    public class ObservableTest
     {
         public class AppState
         {
@@ -64,6 +64,25 @@ namespace ReduxSharp.Tests
         }
 
         [Fact]
+        public void Select_throws_ArgumentNullException_when_selector_is_null()
+        {
+            var store = new Store<AppState>(AppReducer.Invoke);
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                store.Select<AppState, int>(null);
+            });
+        }
+
+        [Fact]
+        public void Select_throws_ArgumentNullException_when_source_is_null()
+        {
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                Observable.Select<AppState, int>(null, s => s.Count);
+            });
+        }
+
+        [Fact]
         public void DistinctUntilChangedTest()
         {
             var values = new List<int>();
@@ -88,6 +107,29 @@ namespace ReduxSharp.Tests
             Assert.Equal(1, values[0]);
             Assert.Equal(2, values[1]);
             Assert.Equal(3, values[2]);
+        }
+
+        [Fact]
+        public void DistinctUntilChanged_throws_ArgumentNullException_when_source_is_null()
+        {
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                Observable.DistinctUntilChanged<AppState>(null);
+            });
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                Observable.DistinctUntilChanged(null, EqualityComparer<AppState>.Default);
+            });
+        }
+
+        [Fact]
+        public void DistinctUntilChanged_throws_ArgumentNullException_when_comparer_is_null()
+        {
+            var store = new Store<AppState>(AppReducer.Invoke);
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                store.DistinctUntilChanged(null);
+            });
         }
     }
 }

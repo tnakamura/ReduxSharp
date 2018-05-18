@@ -2,13 +2,13 @@
 using System;
 using System.Collections.Generic;
 
-namespace ReduxSharp
+namespace ReduxSharp.Linq
 {
     /// <summary>
     /// Provides a set of static methods for writing in-memory queries over observable
     /// sequences.
     /// </summary>
-    public static class StoreExtensions
+    public static class Observable
     {
         /// <summary>
         /// Returns an observable sequence that contains only distinct contiguous elements.
@@ -25,6 +25,8 @@ namespace ReduxSharp
         /// </returns>
         public static IObservable<TSource> DistinctUntilChanged<TSource>(this IObservable<TSource> source)
         {
+            if (source == null) throw new ArgumentNullException(nameof(source));
+
             return source.DistinctUntilChanged(EqualityComparer<TSource>.Default);
         }
 
@@ -47,6 +49,9 @@ namespace ReduxSharp
         /// </returns>
         public static IObservable<TSource> DistinctUntilChanged<TSource>(this IObservable<TSource> source, IEqualityComparer<TSource> comparer)
         {
+            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (comparer == null) throw new ArgumentNullException(nameof(comparer));
+
             return new DistinctUntilChangedObservable<TSource>(source, comparer);
         }
 
@@ -72,6 +77,9 @@ namespace ReduxSharp
         /// </returns>
         public static IObservable<TResult> Select<TSource, TResult>(this IObservable<TSource> source, Func<TSource, TResult> selector)
         {
+            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (selector == null) throw new ArgumentNullException(nameof(selector));
+
             return new SelectObservable<TSource, TResult>(source, selector);
         }
     }

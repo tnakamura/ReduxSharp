@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ReduxSharp.Internal
+namespace ReduxSharp.Linq
 {
     internal class SelectObservable<T, TResult> : IObservable<TResult>
     {
