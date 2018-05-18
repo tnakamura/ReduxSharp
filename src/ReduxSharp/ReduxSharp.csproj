@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>0.2.0</Version>
+    <Version>0.3.0</Version>
     <Authors>tnakamura</Authors>
     <Company />
     <Copyright>tnakamura</Copyright>
@@ -13,8 +13,11 @@
     <RepositoryUrl>https://github.com/tnakamura/ReduxSharp.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>flux redux</PackageTags>
-    <PackageReleaseNotes>.NET Standard 2.0 support.</PackageReleaseNotes>
+    <PackageReleaseNotes>Add Select operator.
+Add DistinctUntilChanged operator.</PackageReleaseNotes>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <AssemblyVersion>0.3.0.0</AssemblyVersion>
+    <FileVersion>0.3.0.0</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
