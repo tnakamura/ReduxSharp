@@ -15,7 +15,7 @@ namespace ReduxSharp
         readonly List<Middleware<TState>> middlewares
             = new List<Middleware<TState>>();
 
-        TState initialState = default(TState);
+        TState initialState = default;
 
         /// <summary>
         /// Initializes a new instance of <see cref="StoreBuilder{TState}"/> class.

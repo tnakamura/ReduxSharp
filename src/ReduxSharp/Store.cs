@@ -32,7 +32,7 @@ namespace ReduxSharp
         /// <param name="middlewares">
         /// Functions that conform to the Redux middleware API.
         /// </param>
-        public Store(Reducer<TState> reducer, TState initialState = default(TState), params Middleware<TState>[] middlewares)
+        public Store(Reducer<TState> reducer, TState initialState = default, params Middleware<TState>[] middlewares)
         {
             this.reducer = reducer ?? throw new ArgumentNullException(nameof(reducer));
             dispatcher = ApplyMiddlewares(middlewares);
