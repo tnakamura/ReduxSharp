@@ -50,7 +50,7 @@ namespace ReduxSharp.Tests
             var store = new StoreBuilder<AppState>(AppReducer.Invoke)
                 .UseLogger(options)
                 .Build();
-            Assert.Equal(1, options.Buffer.Count);
+            Assert.Single(options.Buffer);
             Assert.Equal(typeof(ReduxInitialAction).FullName, options.Buffer[0]);
         }
 
@@ -62,7 +62,7 @@ namespace ReduxSharp.Tests
                 .UseDummy()
                 .UseLogger(options)
                 .Build();
-            Assert.Equal(1, options.Buffer.Count);
+            Assert.Single(options.Buffer);
             Assert.Equal(typeof(DummyAction).FullName, options.Buffer[0]);
         }
     }
