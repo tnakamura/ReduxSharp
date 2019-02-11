@@ -3,7 +3,7 @@
 Unidirectional Data Flow in C# - Inspired by Redux
 
 
-## Install
+## Installation
 
 First, [install Nuget](http://docs.nuget.org/docs/start-here/installing-nuget).
 Then, install [ReduxSharp](http://www.nuget.org/packages/ReduxSharp) from the package manager console:
@@ -13,24 +13,12 @@ PM> Install-Package ReduxSharp
 ```
 
 
-## Usage
-
-### State
-
-```cs
-using System;
-using ReduxSharp;
-
-namespace ReduxSharpSample
-{
-    public class AppState
-    {
-        public int Count { get; set; } = 0;
-    }
-}
-```
+## Quick-start
 
 ### Actions
+
+Actions are payloads of information that send data from your application to your store.
+They only need to implement the markup interface `IAction`.
 
 ```cs
 using System;
@@ -45,6 +33,9 @@ namespace ReduxSharpSample
 ```
 
 ### Reducers
+
+A reducer is a pure function with `(TState state, IAction action) => TState` signature.
+It describes how an action transforms the state into the next state.
 
 ```cs
 using System;
@@ -78,7 +69,30 @@ namespace ReduxSharpSample
 }
 ```
 
+### State
+
+```cs
+using System;
+using ReduxSharp;
+
+namespace ReduxSharpSample
+{
+    public class AppState
+    {
+        public int Count { get; set; } = 0;
+    }
+}
+```
+
 ### Store
+
+The `Store<TState>` is the class that bring actions and reducer together.
+The store has the following responsibilities:
+
+- Holds application state of type TState.
+- Allows state to be update via Dispatch(IAction action).
+- Registers listeners via Subscribe(IObserver observer state changes.
+
 
 ```c#
 using System;
@@ -106,22 +120,8 @@ namespace ReduxSharpSample
 }
 ```
 
-
-## Contribution
-
-1. Fork it
-2. Create your feature branch ( git checkout -b my-new-feature )
-3. Commit your changes ( git commit -am 'Add some feature' )
-4. Push to the branch ( git push origin my-new-feature )
-5. Create new Pull Request
-
-
 ## License
 
 [MIT](https://opensource.org/licenses/MIT)
 
-
-## Author
-
-[tnakamura](https://github.com/tnakamura)
 
