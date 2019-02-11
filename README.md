@@ -90,9 +90,10 @@ The `Store<TState>` is the class that bring actions and reducer together.
 The store has the following responsibilities:
 
 - Holds application state of type TState.
-- Allows state to be update via Dispatch(IAction action).
-- Registers listeners via Subscribe(IObserver observer state changes.
+- Allows state to be update via `Dispatch(IAction action)`.
+- Registers listeners via `Subscribe(IObserver observer)`.The `Store<TState>` class implements IObservable.
 
+The `StoreBuilder<TState>` take an initial state, of type TState, and a reducer.
 
 ```c#
 using System;
