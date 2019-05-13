@@ -1,8 +1,9 @@
-﻿using ReduxSharp.Internal;
-using System;
+﻿using System;
+using System.Runtime.CompilerServices;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ReduxSharp.Internal;
 
 namespace ReduxSharp
 {
@@ -10,15 +11,17 @@ namespace ReduxSharp
     /// A store that holds the complete state tree of your application.
     /// </summary>
     /// <typeparam name="TState">A type of root state tree</typeparam>
-    public partial class Store<TState> : IStore<TState>
+    public partial class Store<TState> : IStore<TState>, IObserverLinkedList<TState>
     {
         readonly object syncRoot = new object();
 
         readonly Reducer<TState> reducer;
 
-        readonly ListObserver<TState> observer = new ListObserver<TState>();
-
         readonly Dispatcher dispatcher;
+
+        ObserverNode<TState> root;
+
+        ObserverNode<TState> last;
 
         /// <summary>
         /// Initializes a new instance of <see cref="Store{TState}"/> class.
@@ -80,7 +83,7 @@ namespace ReduxSharp
             }
             catch (Exception ex)
             {
-                observer.OnError(ex);
+                OnError(ex);
             }
         }
 
@@ -89,7 +92,7 @@ namespace ReduxSharp
             lock (syncRoot)
             {
                 var nextState = State = reducer(State, action);
-                observer.OnNext(nextState);
+                OnNext(nextState);
             }
         }
 
@@ -113,7 +116,7 @@ namespace ReduxSharp
             }
             catch (Exception ex)
             {
-                observer.OnError(ex);
+                OnError(ex);
             }
         }
 
@@ -141,7 +144,7 @@ namespace ReduxSharp
             }
             catch (Exception ex)
             {
-                observer.OnError(ex);
+                OnError(ex);
             }
         }
 
@@ -159,10 +162,59 @@ namespace ReduxSharp
         {
             if (observer == null) throw new ArgumentNullException(nameof(observer));
 
-            lock (syncRoot)
+            var next = new ObserverNode<TState>(this, observer);
+            if (root == null)
             {
-                this.observer.Add(observer);
-                return new Subscription(this, observer);
+                root = last = next;
+            }
+            else
+            {
+                last.Next = next;
+                next.Previous = last;
+                last = next;
+            }
+            return next;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        void OnNext(TState value)
+        {
+            var node = root;
+            while (node != null)
+            {
+                node.OnNext(value);
+                node = node.Next;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        void OnError(Exception error)
+        {
+            var node = root;
+            while (node != null)
+            {
+                node.OnError(error);
+                node = node.Next;
+            }
+        }
+
+        void IObserverLinkedList<TState>.UnsubscribeNode(ObserverNode<TState> node)
+        {
+            if (node == root)
+            {
+                root = node.Next;
+            }
+            if (node == last)
+            {
+                last = node.Previous;
+            }
+            if (node.Previous != null)
+            {
+                node.Previous.Next = node.Next;
+            }
+            if (node.Next != null)
+            {
+                node.Next.Previous = node.Previous;
             }
         }
     }
