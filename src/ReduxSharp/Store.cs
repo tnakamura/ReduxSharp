@@ -11,7 +11,7 @@ namespace ReduxSharp
     /// A store that holds the complete state tree of your application.
     /// </summary>
     /// <typeparam name="TState">A type of root state tree</typeparam>
-    public partial class Store<TState> : IStore<TState>, IObserverLinkedList<TState>
+    public sealed class Store<TState> : IStore<TState>, IObserverLinkedList<TState>
     {
         readonly object syncRoot = new object();
 

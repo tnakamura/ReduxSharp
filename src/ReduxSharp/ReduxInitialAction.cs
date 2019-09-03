@@ -6,7 +6,7 @@
     /// <remarks>
     /// Reducers respond to this action by configuring thier initial state.
     /// </remarks>
-    public class ReduxInitialAction : IAction
+    public sealed class ReduxInitialAction : IAction
     {
     }
 }

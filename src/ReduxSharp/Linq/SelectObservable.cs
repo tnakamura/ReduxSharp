@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ReduxSharp.Linq
 {
-    internal class SelectObservable<T, TResult> : IObservable<TResult>
+    internal sealed class SelectObservable<T, TResult> : IObservable<TResult>
     {
         readonly IObservable<T> source;
 
@@ -21,7 +19,7 @@ namespace ReduxSharp.Linq
             return source.Subscribe(new Select(this, observer));
         }
 
-        class Select : IObserver<T>
+        sealed class Select : IObserver<T>
         {
             readonly SelectObservable<T, TResult> parent;
 

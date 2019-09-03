@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace ReduxSharp.Linq
 {
-    internal class DistinctUntilChangedObservable<T> : IObservable<T>
+    internal sealed class DistinctUntilChangedObservable<T> : IObservable<T>
     {
         readonly IObservable<T> source;
 
@@ -20,7 +20,7 @@ namespace ReduxSharp.Linq
             return source.Subscribe(new DistinctUntilChanged(this, observer));
         }
 
-        class DistinctUntilChanged : IObserver<T>
+        sealed class DistinctUntilChanged : IObserver<T>
         {
             readonly DistinctUntilChangedObservable<T> parent;
 

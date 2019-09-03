@@ -8,7 +8,7 @@ namespace ReduxSharp
     /// A builder for <see cref="Store{TState}"/>
     /// </summary>
     /// <typeparam name="TState">A type of root state tree</typeparam>
-    public class StoreBuilder<TState> : IStoreBuilder<TState>
+    public sealed class StoreBuilder<TState> : IStoreBuilder<TState>
     {
         readonly Reducer<TState> reducer;
 
