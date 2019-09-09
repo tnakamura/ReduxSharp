@@ -54,6 +54,8 @@ namespace ReduxSharp
 
         internal Store(IReducer<TState> reducer, TState initialState, params IMiddleware<TState>[] middlewares)
         {
+            if (reducer == null) throw new ArgumentNullException(nameof(reducer));
+
             internalDispatcher = new InternalDispatcher(this, reducer, middlewares);
             if (initialState != default)
             {
@@ -61,7 +63,7 @@ namespace ReduxSharp
             }
             else
             {
-                internalDispatcher.Invoke(new ReduxInitialAction())
+                DispatchAsync(new ReduxInitialAction())
                     .GetAwaiter()
                     .GetResult();
             }
@@ -165,13 +167,20 @@ namespace ReduxSharp
             }
         }
 
+        /// <summary>
+        /// Dispatches an action.
+        /// </summary>
+        /// <param name="action">
+        /// An object describing the change that makes sense for your application.
+        /// </param>
+        /// <returns>A task that represents the asynchronous dispatch actions.</returns>
         public async ValueTask DispatchAsync<TAction>(TAction action)
         {
             await internalDispatcher.Invoke(action)
                 .ConfigureAwait(false);
         }
 
-        sealed class InternalDispatcher : IDispatcher
+        sealed class InternalDispatcher
         {
             readonly IReducer<TState> reducer;
 

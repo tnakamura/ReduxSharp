@@ -31,7 +31,7 @@ namespace ReduxSharp.Tests
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                new StoreBuilder<AppState>(null);
+                new StoreBuilder<AppState>(null as IReducer<AppState>);
             });
         }
 
