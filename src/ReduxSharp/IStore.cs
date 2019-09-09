@@ -38,5 +38,14 @@ namespace ReduxSharp
         /// </param>
         /// <returns>A task that represents the asynchronous dispatch actions.</returns>
         Task Dispatch(AsyncActionCreator<TState> asyncActionCreator);
+
+        /// <summary>
+        /// Dispatches an action.
+        /// </summary>
+        /// <param name="action">
+        /// An object describing the change that makes sense for your application.
+        /// </param>
+        /// <returns>A task that represents the asynchronous dispatch actions.</returns>
+        Task DispatchAsync<TAction>(TAction action);
     }
 }

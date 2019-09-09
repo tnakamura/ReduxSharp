@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Xunit;
 
 namespace ReduxSharp.Tests
@@ -14,6 +14,8 @@ namespace ReduxSharp.Tests
             public int Count { get; set; }
 
             public class IncrementAction : IAction { }
+
+            public class DecrementAction : IAction { }
         }
 
         public static class AppActionCreators
@@ -64,7 +66,7 @@ namespace ReduxSharp.Tests
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                new Store<AppState>(null);
+                new Store<AppState>(null as Reducer<AppState>);
             });
         }
 
@@ -292,6 +294,133 @@ namespace ReduxSharp.Tests
 
             Assert.NotNull(actual);
             Assert.IsType<NotSupportedException>(actual);
+        }
+
+        public class AsyncAppReducer : IReducer<AppState>
+        {
+            public async Task<AppState> InvokeAsync<TAction>(AppState state, TAction action)
+            {
+                state = state ?? new AppState
+                {
+                    Count = 0,
+                };
+
+                switch (action)
+                {
+                    case AppState.IncrementAction _:
+                        return await Task.Run(() =>
+                        {
+                            return new AppState
+                            {
+                                Count = state.Count + 1,
+                            };
+                        });
+                    case AppState.DecrementAction _:
+                        return await Task.Run(() =>
+                        {
+                            return new AppState
+                            {
+                                Count = state.Count - 1,
+                            };
+                        });
+                    default:
+                        return state;
+                }
+            }
+        }
+
+        public class AsyncLogMiddleware<TState> : IMiddleware<TState>
+        {
+            public List<string> Logs { get; } = new List<string>();
+
+            public async Task InvokeAsync<TAction>(
+                IStore<TState> store,
+                Func<TAction, Task> next,
+                TAction action)
+            {
+                Logs.Add($"Executing {action.GetType().Name}");
+
+                await next(action).ConfigureAwait(false);
+
+                Logs.Add($"Executed {action.GetType().Name}");
+            }
+        }
+
+        public class TimeTravelMiddleweare<TState> : IMiddleware<TState>
+        {
+            public List<History> Histories { get; } = new List<History>();
+
+            public async Task InvokeAsync<TAction>(IStore<TState> store, Func<TAction, Task> next, TAction action)
+            {
+                var history = new History();
+                history.Action = JsonConvert.SerializeObject(action);
+                history.State = JsonConvert.SerializeObject(store.State);
+                Histories.Add(history);
+
+                await next(action);
+            }
+
+            public class History
+            {
+                public string State { get; set; }
+
+                public string Action { get; set; }
+            }
+        }
+
+        [Fact]
+        public async Task DispatchAsyncActionTest()
+        {
+            var store = new Store<AppState>(new AsyncAppReducer(), new AppState());
+            await store.DispatchAsync(new AppState.IncrementAction());
+            Assert.Equal(1, store.State.Count);
+        }
+
+        [Fact]
+        public async Task MiddlewareTest()
+        {
+            var middleware = new AsyncLogMiddleware<AppState>();
+            var store = new Store<AppState>(
+                new AsyncAppReducer(),
+                new AppState(),
+                middleware);
+
+            await store.DispatchAsync(new AppState.IncrementAction());
+
+            Assert.Equal(1, store.State.Count);
+            Assert.Equal(2, middleware.Logs.Count);
+            Assert.Equal("Executing IncrementAction", middleware.Logs[0]);
+            Assert.Equal("Executed IncrementAction", middleware.Logs[1]);
+        }
+
+        [Fact]
+        public async Task TimeTravelTest()
+        {
+            var middleware = new TimeTravelMiddleweare<AppState>();
+            var store = new Store<AppState>(
+                new AsyncAppReducer(),
+                new AppState(),
+                middleware);
+
+            await store.DispatchAsync(new AppState.IncrementAction());
+            await store.DispatchAsync(new AppState.IncrementAction());
+            await store.DispatchAsync(new AppState.DecrementAction());
+            await store.DispatchAsync(new AppState.IncrementAction());
+
+            Assert.Equal(2, store.State.Count);
+            Assert.Equal(4, middleware.Histories.Count);
+
+            Assert.NotNull(JsonConvert.DeserializeObject<AppState.IncrementAction>(middleware.Histories[0].Action));
+            Assert.Equal(0, JsonConvert.DeserializeObject<AppState>(middleware.Histories[0].State).Count);
+
+            Assert.NotNull(JsonConvert.DeserializeObject<AppState.IncrementAction>(middleware.Histories[1].Action));
+            Assert.Equal(1, JsonConvert.DeserializeObject<AppState>(middleware.Histories[1].State).Count);
+
+            Assert.NotNull(JsonConvert.DeserializeObject<AppState.DecrementAction>(middleware.Histories[2].Action));
+            Assert.Equal(2, JsonConvert.DeserializeObject<AppState>(middleware.Histories[2].State).Count);
+
+            Assert.NotNull(JsonConvert.DeserializeObject<AppState.IncrementAction>(middleware.Histories[3].Action));
+            Assert.Equal(1, JsonConvert.DeserializeObject<AppState>(middleware.Histories[3].State).Count);
         }
     }
 }

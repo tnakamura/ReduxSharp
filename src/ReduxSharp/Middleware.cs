@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace ReduxSharp
 {
@@ -10,4 +11,9 @@ namespace ReduxSharp
     /// <param name="next">A dispatch function</param>
     /// <returns>A new dispatch function</returns>
     public delegate Dispatcher Middleware<TState>(IStore<TState> store, Dispatcher next);
+
+    public interface IMiddleware<TState>
+    {
+        Task InvokeAsync<TAction>(IStore<TState> store, Func<TAction, Task> next, TAction action);
+    }
 }

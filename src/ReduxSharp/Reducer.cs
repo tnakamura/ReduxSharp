@@ -1,4 +1,6 @@
-﻿namespace ReduxSharp
+﻿using System.Threading.Tasks;
+
+namespace ReduxSharp
 {
     /// <summary>
     /// Accepts an accumulation and a value and returns a new accumulation.
@@ -8,4 +10,9 @@
     /// <param name="action">An action object</param>
     /// <returns>A new state object</returns>
     public delegate TState Reducer<TState>(TState state, IAction action);
+
+    public interface IReducer<TState>
+    {
+        Task<TState> InvokeAsync<TAction>(TState state, TAction action);
+    }
 }

@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using ReduxSharp.Internal;
 
@@ -18,6 +18,8 @@ namespace ReduxSharp
         readonly Reducer<TState> reducer;
 
         readonly Dispatcher dispatcher;
+
+        readonly InternalDispatcher internalDispatcher;
 
         ObserverNode<TState> root;
 
@@ -47,6 +49,21 @@ namespace ReduxSharp
             else
             {
                 dispatcher(new ReduxInitialAction());
+            }
+        }
+
+        internal Store(IReducer<TState> reducer, TState initialState, params IMiddleware<TState>[] middlewares)
+        {
+            internalDispatcher = new InternalDispatcher(this, reducer, middlewares);
+            if (initialState != default)
+            {
+                State = initialState;
+            }
+            else
+            {
+                internalDispatcher.InvokeAsync(new ReduxInitialAction())
+                    .GetAwaiter()
+                    .GetResult();
             }
         }
 
@@ -145,6 +162,69 @@ namespace ReduxSharp
             catch (Exception ex)
             {
                 OnError(ex);
+            }
+        }
+
+        public async Task DispatchAsync<TAction>(TAction action)
+        {
+            await internalDispatcher.InvokeAsync(action)
+                .ConfigureAwait(false);
+        }
+
+        sealed class InternalDispatcher : IDispatcher
+        {
+            readonly IReducer<TState> reducer;
+
+            readonly Store<TState> store;
+
+            readonly IMiddleware<TState>[] middlewares;
+
+            public InternalDispatcher(
+                Store<TState> store,
+                IReducer<TState> reducer,
+                IMiddleware<TState>[] middlewares)
+            {
+                this.reducer = reducer;
+                this.store = store;
+                this.middlewares = middlewares;
+            }
+
+            public async Task InvokeAsync<TAction>(TAction action)
+            {
+                await InvokeMiddlewareAsync(0, action)
+                    .ConfigureAwait(false);
+            }
+
+            async Task InvokeMiddlewareAsync<TAction>(int index, TAction action)
+            {
+                if (index < middlewares.Length)
+                {
+                    await middlewares[index].InvokeAsync(
+                        store,
+                        x => InvokeMiddlewareAsync(index + 1, x),
+                        action);
+                }
+                else
+                {
+                    await InvokeCoreAsync(action)
+                        .ConfigureAwait(false);
+                }
+            }
+
+            async Task InvokeCoreAsync<TAction>(TAction action)
+            {
+                try
+                {
+                    var currentState = store.State;
+                    var nextState = await reducer.InvokeAsync(currentState, action)
+                        .ConfigureAwait(false);
+                    store.State = nextState;
+                    store.OnNext(nextState);
+                }
+                catch (Exception ex)
+                {
+                    store.OnError(ex);
+                }
             }
         }
 
