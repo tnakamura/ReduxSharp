@@ -45,5 +45,12 @@ namespace ReduxSharp
         /// <param name="args">The arguments to pass to the middleware type instance's constructor.</param>
         /// <returns>The <see cref="IStoreBuilder{TState}"/> instance.</returns>
         IStoreBuilder<TState> UseMiddleware(Type middleware, params object[] args);
+
+        /// <summary>
+        /// Adds a middleware instance to the store's dispatch pipeline.
+        /// </summary>
+        /// <param name="middleware">The middleware instance.</param>
+        /// <returns>The <see cref="IStoreBuilder{TState}"/> instance.</returns>
+        IStoreBuilder<TState> UseMiddleware(IMiddleware<TState> middleware);
     }
 }

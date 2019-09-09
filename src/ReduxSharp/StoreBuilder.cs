@@ -14,8 +14,11 @@ namespace ReduxSharp
 
         readonly IReducer<TState> reducerObject;
 
-        readonly List<Middleware<TState>> middlewares
-            = new List<Middleware<TState>>();
+        readonly List<IMiddleware<TState>> middlewareObjects =
+            new List<IMiddleware<TState>>();
+
+        readonly List<Middleware<TState>> middlewares =
+            new List<Middleware<TState>>();
 
         TState initialState = default;
 
@@ -77,11 +80,15 @@ namespace ReduxSharp
             {
                 return new Store<TState>(
                     reducerObject,
-                    initialState);
+                    initialState,
+                    middlewareObjects.ToArray());
             }
             else
             {
-                return new Store<TState>(reducer, initialState, middlewares.ToArray());
+                return new Store<TState>(
+                    reducer,
+                    initialState,
+                    middlewares.ToArray());
             }
         }
 
@@ -107,6 +114,20 @@ namespace ReduxSharp
             if (middleware == null) throw new ArgumentNullException(nameof(middleware));
 
             return UseMiddleware(MiddlewareFactory.Create<TState>(middleware, args));
+        }
+
+        /// <summary>
+        /// Adds a middleware instance to the store's dispatch pipeline.
+        /// </summary>
+        /// <param name="middleware">The middleware instance.</param>
+        /// <returns>The <see cref="IStoreBuilder{TState}"/> instance.</returns>
+        public IStoreBuilder<TState> UseMiddleware(IMiddleware<TState> middleware)
+        {
+            if (middleware == null) throw new ArgumentNullException(nameof(middleware));
+
+            middlewareObjects.Add(middleware);
+
+            return this;
         }
     }
 }

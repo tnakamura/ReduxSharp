@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace ReduxSharp.Tests
@@ -15,10 +16,18 @@ namespace ReduxSharp.Tests
             }
         }
 
+        public class AsyncAppReducer : IReducer<AppState>
+        {
+            public ValueTask<AppState> Invoke<TAction>(AppState state, TAction action)
+            {
+                return new ValueTask<AppState>(state ?? new AppState());
+            }
+        }
+
         [Fact]
         public void Constructor_initialize_new_instance()
         {
-            var builder = new StoreBuilder<AppState>(AppReducer.Invoke);
+            var builder = new StoreBuilder<AppState>(new AsyncAppReducer());
             Assert.NotNull(builder);
         }
 
@@ -34,7 +43,7 @@ namespace ReduxSharp.Tests
         [Fact]
         public void Build_returns_new_store_instance()
         {
-            var builder = new StoreBuilder<AppState>(AppReducer.Invoke);
+            var builder = new StoreBuilder<AppState>(new AsyncAppReducer());
             var store = builder.Build();
             Assert.NotNull(store);
         }
