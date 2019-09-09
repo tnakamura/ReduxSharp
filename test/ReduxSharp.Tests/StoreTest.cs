@@ -325,12 +325,12 @@ namespace ReduxSharp.Tests
 
             public async ValueTask Invoke<TAction>(
                 IStore<TState> store,
-                Func<TAction, ValueTask> next,
+                IDispatcher next,
                 TAction action)
             {
                 Logs.Add($"Executing {action.GetType().Name}");
 
-                await next(action).ConfigureAwait(false);
+                await next.Invoke(action).ConfigureAwait(false);
 
                 Logs.Add($"Executed {action.GetType().Name}");
             }
@@ -342,7 +342,7 @@ namespace ReduxSharp.Tests
 
             public async ValueTask Invoke<TAction>(
                 IStore<TState> store,
-                Func<TAction, ValueTask> next,
+                IDispatcher next,
                 TAction action)
             {
                 var history = new History();
@@ -350,7 +350,7 @@ namespace ReduxSharp.Tests
                 history.State = JsonConvert.SerializeObject(store.State);
                 Histories.Add(history);
 
-                await next(action);
+                await next.Invoke(action);
             }
 
             public class History

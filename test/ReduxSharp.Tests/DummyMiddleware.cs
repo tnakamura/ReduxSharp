@@ -1,21 +1,14 @@
-﻿namespace ReduxSharp.Tests
+﻿using System.Threading.Tasks;
+
+namespace ReduxSharp.Tests
 {
-    public class DummyMiddleware<TState>
+    public class DummyMiddleware<TState> : IMiddleware<TState>
     {
-        readonly IStore<TState> store;
-        readonly Dispatcher next;
-
-        public DummyMiddleware(IStore<TState> store, Dispatcher next)
-        {
-            this.store = store;
-            this.next = next;
-        }
-
-        public void Invoke(IAction action)
-        {
-            next(new DummyAction());
-        }
-    }
+		public async ValueTask Invoke<TAction>(IStore<TState> store, IDispatcher next, TAction action)
+		{
+			await next.Invoke(new DummyAction());
+		}
+	}
 
     public class DummyAction : IAction
     {
@@ -25,7 +18,7 @@
     {
         public static IStoreBuilder<TState> UseDummy<TState>(this IStoreBuilder<TState> store)
         {
-            return store.UseMiddleware<DummyMiddleware<TState>>();
+            return store.UseMiddleware(new DummyMiddleware<TState>());
         }
     }
 }

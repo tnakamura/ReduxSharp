@@ -14,6 +14,6 @@ namespace ReduxSharp
 
     public interface IMiddleware<TState>
     {
-        ValueTask Invoke<TAction>(IStore<TState> store, Func<TAction, ValueTask> next, TAction action);
+        ValueTask Invoke<TAction>(IStore<TState> store, IDispatcher next, TAction action);
     }
 }

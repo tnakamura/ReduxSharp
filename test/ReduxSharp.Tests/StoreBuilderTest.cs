@@ -36,7 +36,7 @@ namespace ReduxSharp.Tests
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                new StoreBuilder<AppState>(null as IReducer<AppState>);
+                _ = new StoreBuilder<AppState>(null as IReducer<AppState>);
             });
         }
 
@@ -52,7 +52,7 @@ namespace ReduxSharp.Tests
         public void UseMiddleware_add_class_type_middleware_to_store()
         {
             var options = new LoggerOptions();
-            var store = new StoreBuilder<AppState>(AppReducer.Invoke)
+            var store = new StoreBuilder<AppState>(new AsyncAppReducer())
                 .UseLogger(options)
                 .Build();
             Assert.Single(options.Buffer);
@@ -63,7 +63,7 @@ namespace ReduxSharp.Tests
         public void UseMiddleware_add_middleware_that_no_options()
         {
             var options = new LoggerOptions();
-            var store = new StoreBuilder<AppState>(AppReducer.Invoke)
+            var store = new StoreBuilder<AppState>(new AsyncAppReducer())
                 .UseDummy()
                 .UseLogger(options)
                 .Build();

@@ -19,7 +19,7 @@ namespace ReduxSharp
 
         readonly Dispatcher dispatcher;
 
-        readonly InternalDispatcher internalDispatcher;
+        readonly PipelinedDispatcher internalDispatcher;
 
         ObserverNode<TState> root;
 
@@ -42,7 +42,7 @@ namespace ReduxSharp
             this.reducer = reducer ?? throw new ArgumentNullException(nameof(reducer));
             dispatcher = ApplyMiddlewares(middlewares);
 
-            if (initialState != null)
+            if (initialState != default)
             {
                 State = initialState;
             }
@@ -56,7 +56,7 @@ namespace ReduxSharp
         {
             if (reducer == null) throw new ArgumentNullException(nameof(reducer));
 
-            internalDispatcher = new InternalDispatcher(this, reducer, middlewares);
+            internalDispatcher = new PipelinedDispatcher(this, reducer, middlewares);
             if (initialState != default)
             {
                 State = initialState;
@@ -180,60 +180,76 @@ namespace ReduxSharp
                 .ConfigureAwait(false);
         }
 
-        sealed class InternalDispatcher
+		sealed class MiddlewareWrapper : IDispatcher
+		{
+			readonly IMiddleware<TState> middleware;
+
+			readonly IDispatcher next;
+
+			readonly Store<TState> store;
+
+			public MiddlewareWrapper(IMiddleware<TState> middleware, Store<TState> store, IDispatcher next)
+			{
+				this.store = store;
+				this.next = next;
+				this.middleware = middleware;
+			}
+
+			public async ValueTask Invoke<TAction>(TAction action)
+			{
+				await middleware.Invoke(store, next, action).ConfigureAwait(false);
+			}
+		}
+
+		sealed class DispatcherCore : IDispatcher
+		{
+			readonly IReducer<TState> reducer;
+
+			readonly Store<TState> store;
+
+			public DispatcherCore(Store<TState>store, IReducer<TState>reducer)
+			{
+				this.store = store;
+				this.reducer = reducer;
+			}
+
+			public async ValueTask Invoke<TAction>(TAction action)
+			{
+				try
+				{
+					var currentState = store.State;
+					var nextState = await reducer.Invoke(currentState, action)
+						.ConfigureAwait(false);
+					store.State = nextState;
+					store.OnNext(nextState);
+				}
+				catch (Exception ex)
+				{
+					store.OnError(ex);
+				}
+			}
+		}
+
+		sealed class PipelinedDispatcher : IDispatcher
         {
-            readonly IReducer<TState> reducer;
+            readonly IDispatcher innerDispatcher;
 
-            readonly Store<TState> store;
-
-            readonly IMiddleware<TState>[] middlewares;
-
-            public InternalDispatcher(
+            public PipelinedDispatcher(
                 Store<TState> store,
                 IReducer<TState> reducer,
                 IMiddleware<TState>[] middlewares)
             {
-                this.reducer = reducer;
-                this.store = store;
-                this.middlewares = middlewares;
+				IDispatcher next = new DispatcherCore(store, reducer);
+				foreach(var middleware in middlewares.Reverse())
+				{
+					next = new MiddlewareWrapper(middleware, store, next);
+				}
+				innerDispatcher = next;
             }
 
             public async ValueTask Invoke<TAction>(TAction action)
             {
-                await InvokeMiddlewareAsync(0, action)
-                    .ConfigureAwait(false);
-            }
-
-            async ValueTask InvokeMiddlewareAsync<TAction>(int index, TAction action)
-            {
-                if (index < middlewares.Length)
-                {
-                    await middlewares[index].Invoke(
-                        store,
-                        x => InvokeMiddlewareAsync(index + 1, x),
-                        action);
-                }
-                else
-                {
-                    await InvokeCoreAsync(action)
-                        .ConfigureAwait(false);
-                }
-            }
-
-            async ValueTask InvokeCoreAsync<TAction>(TAction action)
-            {
-                try
-                {
-                    var currentState = store.State;
-                    var nextState = await reducer.Invoke(currentState, action)
-                        .ConfigureAwait(false);
-                    store.State = nextState;
-                    store.OnNext(nextState);
-                }
-                catch (Exception ex)
-                {
-                    store.OnError(ex);
-                }
+				await innerDispatcher.Invoke(action).ConfigureAwait(false);
             }
         }
 
