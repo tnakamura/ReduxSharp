@@ -1,26 +1,37 @@
-﻿using ReduxSharp;
+﻿using System.Threading.Tasks;
+using ReduxSharp;
 
 namespace Counter
 {
-    public static class AppReducer
+    public class AppReducer : IReducer<AppState>
     {
-        public static AppState Invoke(AppState state, IAction action)
+        public async ValueTask<AppState> Invoke<TAction>(AppState state, TAction action)
         {
             if (action is CountUpAction)
             {
-                state.Counter = new CounterState()
+                return await Task.Run(() =>
                 {
-                    Count = state.Counter.Count + 1
-                };
-                return state;
+                    return new AppState
+                    {
+                        Counter = new CounterState
+                        {
+                            Count = state.Counter.Count + 1,
+                        }
+                    };
+                });
             }
             else if (action is CountDownAction)
             {
-                state.Counter = new CounterState()
+                return await Task.Run(() =>
                 {
-                    Count = state.Counter.Count - 1
-                };
-                return state;
+                    return new AppState
+                    {
+                        Counter = new CounterState
+                        {
+                            Count = state.Counter.Count - 1,
+                        }
+                    };
+                });
             }
             else
             {
@@ -29,14 +40,14 @@ namespace Counter
         }
     }
 
-    public class CountUpAction : IAction
+    public class CountUpAction
     {
         CountUpAction() { }
 
         public static readonly CountUpAction Instance = new CountUpAction();
     }
 
-    public class CountDownAction : IAction
+    public class CountDownAction
     {
         CountDownAction() { }
 

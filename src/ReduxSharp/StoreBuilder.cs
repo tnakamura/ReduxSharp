@@ -12,6 +12,8 @@ namespace ReduxSharp
     {
         readonly Reducer<TState> reducer;
 
+        readonly IReducer<TState> reducerObject;
+
         readonly List<Middleware<TState>> middlewares
             = new List<Middleware<TState>>();
 
@@ -26,6 +28,17 @@ namespace ReduxSharp
         public StoreBuilder(Reducer<TState> reducer)
         {
             this.reducer = reducer ?? throw new ArgumentNullException(nameof(reducer));
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="StoreBuilder{TState}"/> class.
+        /// </summary>
+        /// <param name="reducer">
+        /// A reducing function that returns the next state tree.
+        /// </param>
+        public StoreBuilder(IReducer<TState> reducer)
+        {
+            reducerObject = reducer ?? throw new ArgumentNullException(nameof(reducer));
         }
 
         /// <summary>
@@ -60,7 +73,16 @@ namespace ReduxSharp
         /// <returns>The <see cref="IStore{TState}"/>.</returns>
         public IStore<TState> Build()
         {
-            return new Store<TState>(reducer, initialState, middlewares.ToArray());
+            if (reducerObject != null)
+            {
+                return new Store<TState>(
+                    reducerObject,
+                    initialState);
+            }
+            else
+            {
+                return new Store<TState>(reducer, initialState, middlewares.ToArray());
+            }
         }
 
         /// <summary>
