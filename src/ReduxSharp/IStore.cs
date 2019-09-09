@@ -46,6 +46,6 @@ namespace ReduxSharp
         /// An object describing the change that makes sense for your application.
         /// </param>
         /// <returns>A task that represents the asynchronous dispatch actions.</returns>
-        Task DispatchAsync<TAction>(TAction action);
+        ValueTask DispatchAsync<TAction>(TAction action);
     }
 }

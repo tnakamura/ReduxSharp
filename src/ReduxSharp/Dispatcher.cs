@@ -12,6 +12,6 @@ namespace ReduxSharp
 
     public interface IDispatcher
     {
-        Task InvokeAsync<TAction>(TAction action);
+        ValueTask Invoke<TAction>(TAction action);
     }
 }

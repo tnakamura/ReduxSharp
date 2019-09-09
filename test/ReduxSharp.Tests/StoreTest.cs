@@ -298,7 +298,7 @@ namespace ReduxSharp.Tests
 
         public class AsyncAppReducer : IReducer<AppState>
         {
-            public async Task<AppState> InvokeAsync<TAction>(AppState state, TAction action)
+            public async ValueTask<AppState> Invoke<TAction>(AppState state, TAction action)
             {
                 state = state ?? new AppState
                 {
@@ -333,9 +333,9 @@ namespace ReduxSharp.Tests
         {
             public List<string> Logs { get; } = new List<string>();
 
-            public async Task InvokeAsync<TAction>(
+            public async ValueTask Invoke<TAction>(
                 IStore<TState> store,
-                Func<TAction, Task> next,
+                Func<TAction, ValueTask> next,
                 TAction action)
             {
                 Logs.Add($"Executing {action.GetType().Name}");
@@ -350,7 +350,10 @@ namespace ReduxSharp.Tests
         {
             public List<History> Histories { get; } = new List<History>();
 
-            public async Task InvokeAsync<TAction>(IStore<TState> store, Func<TAction, Task> next, TAction action)
+            public async ValueTask Invoke<TAction>(
+                IStore<TState> store,
+                Func<TAction, ValueTask> next,
+                TAction action)
             {
                 var history = new History();
                 history.Action = JsonConvert.SerializeObject(action);

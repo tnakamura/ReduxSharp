@@ -61,7 +61,7 @@ namespace ReduxSharp
             }
             else
             {
-                internalDispatcher.InvokeAsync(new ReduxInitialAction())
+                internalDispatcher.Invoke(new ReduxInitialAction())
                     .GetAwaiter()
                     .GetResult();
             }
@@ -165,9 +165,9 @@ namespace ReduxSharp
             }
         }
 
-        public async Task DispatchAsync<TAction>(TAction action)
+        public async ValueTask DispatchAsync<TAction>(TAction action)
         {
-            await internalDispatcher.InvokeAsync(action)
+            await internalDispatcher.Invoke(action)
                 .ConfigureAwait(false);
         }
 
@@ -189,17 +189,17 @@ namespace ReduxSharp
                 this.middlewares = middlewares;
             }
 
-            public async Task InvokeAsync<TAction>(TAction action)
+            public async ValueTask Invoke<TAction>(TAction action)
             {
                 await InvokeMiddlewareAsync(0, action)
                     .ConfigureAwait(false);
             }
 
-            async Task InvokeMiddlewareAsync<TAction>(int index, TAction action)
+            async ValueTask InvokeMiddlewareAsync<TAction>(int index, TAction action)
             {
                 if (index < middlewares.Length)
                 {
-                    await middlewares[index].InvokeAsync(
+                    await middlewares[index].Invoke(
                         store,
                         x => InvokeMiddlewareAsync(index + 1, x),
                         action);
@@ -211,12 +211,12 @@ namespace ReduxSharp
                 }
             }
 
-            async Task InvokeCoreAsync<TAction>(TAction action)
+            async ValueTask InvokeCoreAsync<TAction>(TAction action)
             {
                 try
                 {
                     var currentState = store.State;
-                    var nextState = await reducer.InvokeAsync(currentState, action)
+                    var nextState = await reducer.Invoke(currentState, action)
                         .ConfigureAwait(false);
                     store.State = nextState;
                     store.OnNext(nextState);

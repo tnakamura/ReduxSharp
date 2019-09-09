@@ -13,6 +13,6 @@ namespace ReduxSharp
 
     public interface IReducer<TState>
     {
-        Task<TState> InvokeAsync<TAction>(TState state, TAction action);
+        ValueTask<TState> Invoke<TAction>(TState state, TAction action);
     }
 }

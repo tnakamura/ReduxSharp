@@ -2,23 +2,23 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>0.3.0</Version>
+    <Version>0.4.0-pre</Version>
     <Authors>tnakamura</Authors>
     <Company />
     <Copyright>tnakamura</Copyright>
     <NeutralLanguage>en</NeutralLanguage>
-    <PackageLicenseUrl>https://raw.githubusercontent.com/tnakamura/ReduxSharp/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseUrl></PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/tnakamura/ReduxSharp</PackageProjectUrl>
     <Description>Unidirectional Data Flow in C# - Inspired by Redux</Description>
     <RepositoryUrl>https://github.com/tnakamura/ReduxSharp.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>flux redux</PackageTags>
-    <PackageReleaseNotes>Add Select operator.
-Add DistinctUntilChanged operator.</PackageReleaseNotes>
+    <PackageReleaseNotes></PackageReleaseNotes>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AssemblyVersion>0.3.0.0</AssemblyVersion>
-    <FileVersion>0.3.0.0</FileVersion>
+    <AssemblyVersion>0.4.0.0</AssemblyVersion>
+    <FileVersion>0.4.0.0</FileVersion>
     <LangVersion>latest</LangVersion>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -28,5 +28,9 @@ Add DistinctUntilChanged operator.</PackageReleaseNotes>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DocumentationFile>bin\Release\netstandard2.0\ReduxSharp.xml</DocumentationFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.3" />
+  </ItemGroup>
 
 </Project>
