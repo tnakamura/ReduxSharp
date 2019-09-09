@@ -35,12 +35,12 @@ namespace RxCounter
 
         public void CountUp()
         {
-            App.Store.DispatchAsync(CountUpAction.Instance);
+            App.Store.Dispatch(CountUpAction.Instance);
         }
 
         public void CountDown()
         {
-            App.Store.DispatchAsync(CountDownAction.Instance);
+            App.Store.Dispatch(CountDownAction.Instance);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

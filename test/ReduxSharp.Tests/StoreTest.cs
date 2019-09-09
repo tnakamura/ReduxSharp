@@ -74,7 +74,7 @@ namespace ReduxSharp.Tests
         public async Task DispatchActionTest()
         {
             var store = new Store<AppState>(new AsyncAppReducer(), new AppState());
-            await store.DispatchAsync(new AppState.IncrementAction());
+            await store.Dispatch(new AppState.IncrementAction());
             Assert.Equal(1, store.State.Count);
         }
 
@@ -123,7 +123,7 @@ namespace ReduxSharp.Tests
 
             await Task.WhenAll(Enumerable.Range(0, 1000).Select(_ => Task.Run(() =>
             {
-                store.Dispatch(new AppState.IncrementAction());
+                store.Dispatch((IAction)new AppState.IncrementAction());
             })));
 
             Assert.Equal(1000, store.State.Count);
@@ -153,7 +153,7 @@ namespace ReduxSharp.Tests
             };
             store.Subscribe(observer);
 
-            store.Dispatch(new StandardAction("test"));
+            store.Dispatch((IAction)new StandardAction("test"));
 
             Assert.NotNull(actual);
             Assert.IsType<NotSupportedException>(actual);
@@ -365,7 +365,7 @@ namespace ReduxSharp.Tests
         public async Task DispatchAsyncActionTest()
         {
             var store = new Store<AppState>(new AsyncAppReducer(), new AppState());
-            await store.DispatchAsync(new AppState.IncrementAction());
+            await store.Dispatch(new AppState.IncrementAction());
             Assert.Equal(1, store.State.Count);
         }
 
@@ -378,7 +378,7 @@ namespace ReduxSharp.Tests
                 new AppState(),
                 middleware);
 
-            await store.DispatchAsync(new AppState.IncrementAction());
+            await store.Dispatch(new AppState.IncrementAction());
 
             Assert.Equal(1, store.State.Count);
             Assert.Equal(2, middleware.Logs.Count);
@@ -395,10 +395,10 @@ namespace ReduxSharp.Tests
                 new AppState(),
                 middleware);
 
-            await store.DispatchAsync(new AppState.IncrementAction());
-            await store.DispatchAsync(new AppState.IncrementAction());
-            await store.DispatchAsync(new AppState.DecrementAction());
-            await store.DispatchAsync(new AppState.IncrementAction());
+            await store.Dispatch(new AppState.IncrementAction());
+            await store.Dispatch(new AppState.IncrementAction());
+            await store.Dispatch(new AppState.DecrementAction());
+            await store.Dispatch(new AppState.IncrementAction());
 
             Assert.Equal(2, store.State.Count);
             Assert.Equal(4, middleware.Histories.Count);

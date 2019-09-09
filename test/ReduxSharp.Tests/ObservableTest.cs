@@ -54,9 +54,9 @@ namespace ReduxSharp.Tests
                 }
             });
 
-            store.Dispatch(new IncrementAction());
-            store.Dispatch(new IncrementAction());
-            store.Dispatch(new IncrementAction());
+            store.Dispatch((IAction)new IncrementAction());
+            store.Dispatch((IAction)new IncrementAction());
+            store.Dispatch((IAction)new IncrementAction());
 
             Assert.Equal(1, values[0]);
             Assert.Equal(2, values[1]);
@@ -97,12 +97,12 @@ namespace ReduxSharp.Tests
                     }
                 });
 
-            store.Dispatch(new ReplaceAction(1));
-            store.Dispatch(new ReplaceAction(1));
-            store.Dispatch(new ReplaceAction(2));
-            store.Dispatch(new ReplaceAction(2));
-            store.Dispatch(new ReplaceAction(3));
-            store.Dispatch(new ReplaceAction(3));
+            store.Dispatch((IAction)new ReplaceAction(1));
+            store.Dispatch((IAction)new ReplaceAction(1));
+            store.Dispatch((IAction)new ReplaceAction(2));
+            store.Dispatch((IAction)new ReplaceAction(2));
+            store.Dispatch((IAction)new ReplaceAction(3));
+            store.Dispatch((IAction)new ReplaceAction(3));
 
             Assert.Equal(1, values[0]);
             Assert.Equal(2, values[1]);

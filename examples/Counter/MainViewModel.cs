@@ -27,12 +27,12 @@ namespace Counter
 
         public void CountUp()
         {
-            App.Store.DispatchAsync(CountUpAction.Instance);
+            App.Store.Dispatch(CountUpAction.Instance);
         }
 
         public void CountDown()
         {
-            App.Store.DispatchAsync(CountDownAction.Instance);
+            App.Store.Dispatch(CountDownAction.Instance);
         }
 
         public void OnCompleted()

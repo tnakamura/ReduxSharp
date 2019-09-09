@@ -40,7 +40,7 @@ namespace TodoList
                     ?? new DelegateCommand(
                         _ =>
                         {
-                            App.Store.DispatchAsync(new AddTodoAction(NewTodo));
+                            App.Store.Dispatch(new AddTodoAction(NewTodo));
                             NewTodo = string.Empty;
                         },
                         _ => !string.IsNullOrEmpty(NewTodo));
@@ -95,7 +95,7 @@ namespace TodoList
                 return _completeCommand = _completeCommand
                     ?? new DelegateCommand(_ =>
                     {
-                        App.Store.DispatchAsync(new CompleteTodoAction(Id));
+                        App.Store.Dispatch(new CompleteTodoAction(Id));
                     });
             }
         }
@@ -109,7 +109,7 @@ namespace TodoList
                 return _deleteCommand = _deleteCommand
                     ?? new DelegateCommand(_ =>
                     {
-                        App.Store.DispatchAsync(new DeleteTodoAction(Id));
+                        App.Store.Dispatch(new DeleteTodoAction(Id));
                     });
             }
         }

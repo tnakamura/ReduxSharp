@@ -63,7 +63,7 @@ namespace ReduxSharp
             }
             else
             {
-                DispatchAsync(new ReduxInitialAction())
+                Dispatch(new ReduxInitialAction())
                     .GetAwaiter()
                     .GetResult();
             }
@@ -174,7 +174,7 @@ namespace ReduxSharp
         /// An object describing the change that makes sense for your application.
         /// </param>
         /// <returns>A task that represents the asynchronous dispatch actions.</returns>
-        public async ValueTask DispatchAsync<TAction>(TAction action)
+        public async ValueTask Dispatch<TAction>(TAction action)
         {
             await internalDispatcher.Invoke(action)
                 .ConfigureAwait(false);
