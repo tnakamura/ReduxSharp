@@ -6,9 +6,7 @@ namespace ReduxSharp
     /// <summary>
     /// ReduxSharp's built in action type.
     /// </summary>
-#pragma warning disable CS0612
-    public sealed class StandardAction : IAction
-#pragma warning restore CS0612  
+    public sealed class StandardAction
     {
         /// <summary>
         /// Initializes a new instance of <see cref="StandardAction"/> class.

@@ -13,15 +13,7 @@ namespace ReduxSharp
     /// <typeparam name="TState">A type of root state tree</typeparam>
     public sealed class Store<TState> : IStore<TState>, IObserverLinkedList<TState>
     {
-        readonly object syncRoot = new object();
-
-        [Obsolete]
-        readonly Reducer<TState> reducer;
-
-        [Obsolete]
-        readonly Dispatcher dispatcher;
-
-        readonly DispatchPipeline internalDispatcher;
+        readonly DispatchPipeline dispatcher;
 
         readonly AsyncLock writeLock = new AsyncLock();
 
@@ -29,39 +21,11 @@ namespace ReduxSharp
 
         ObserverNode<TState> last;
 
-        /// <summary>
-        /// Initializes a new instance of <see cref="Store{TState}"/> class.
-        /// </summary>
-        /// <param name="reducer">
-        /// A reducing function that returns the next state tree.
-        /// </param>
-        /// <param name="initialState">
-        /// The initial state.
-        /// </param>
-        /// <param name="middlewares">
-        /// Functions that conform to the Redux middleware API.
-        /// </param>
-        [Obsolete]
-        public Store(Reducer<TState> reducer, TState initialState = default, params Middleware<TState>[] middlewares)
-        {
-            this.reducer = reducer ?? throw new ArgumentNullException(nameof(reducer));
-            dispatcher = ApplyMiddlewares(middlewares);
-
-            if (initialState != default)
-            {
-                State = initialState;
-            }
-            else
-            {
-                dispatcher(new ReduxInitialAction());
-            }
-        }
-
         internal Store(IReducer<TState> reducer, TState initialState, params IMiddleware<TState>[] middlewares)
         {
             if (reducer == null) throw new ArgumentNullException(nameof(reducer));
 
-            internalDispatcher = new DispatchPipeline(this, reducer, middlewares);
+            dispatcher = new DispatchPipeline(this, reducer, middlewares);
             if (initialState != default)
             {
                 State = initialState;
@@ -79,104 +43,6 @@ namespace ReduxSharp
         /// </summary>
         public TState State { get; private set; }
 
-        [Obsolete]
-        Dispatcher ApplyMiddlewares(IEnumerable<Middleware<TState>> middlewares)
-        {
-            return middlewares
-                .Reverse()
-                .Aggregate<Middleware<TState>, Dispatcher>(
-                    InternalDispatch,
-                    (next, middleware) => middleware(this, next));
-        }
-
-        /// <summary>
-        /// Dispatches an action.
-        /// </summary>
-        /// <remarks>
-        /// This is the only way to trigger a state change.
-        /// </remarks>
-        /// <param name="action">
-        /// An object describing the change that makes sense for your application.
-        /// </param>
-        [Obsolete]
-        public void Dispatch(IAction action)
-        {
-            if (action == null) throw new ArgumentNullException(nameof(action));
-
-            try
-            {
-                dispatcher(action);
-            }
-            catch (Exception ex)
-            {
-                OnError(ex);
-            }
-        }
-
-        [Obsolete]
-        void InternalDispatch(IAction action)
-        {
-            lock (syncRoot)
-            {
-                var nextState = State = reducer(State, action);
-                OnNext(nextState);
-            }
-        }
-
-        /// <summary>
-        /// Dispatches an action creator.
-        /// </summary>
-        /// <param name="actionCreator">
-        /// A function that creates an action.
-        /// </param>
-        [Obsolete]
-        public void Dispatch(ActionCreator<TState> actionCreator)
-        {
-            if (actionCreator == null) throw new ArgumentNullException(nameof(actionCreator));
-
-            try
-            {
-                var action = actionCreator(State, this);
-                if (action != null)
-                {
-                    dispatcher(action);
-                }
-            }
-            catch (Exception ex)
-            {
-                OnError(ex);
-            }
-        }
-
-        /// <summary>
-        /// Dispatches an async action creator.
-        /// </summary>
-        /// <param name="asyncActionCreator">
-        /// A function that creates and dispatches actions asynchronously.
-        /// </param>
-        /// <returns>A task that represents the asynchronous dispatch actions.</returns>
-        [Obsolete]
-        public async Task Dispatch(AsyncActionCreator<TState> asyncActionCreator)
-        {
-            if (asyncActionCreator == null) throw new ArgumentNullException(nameof(asyncActionCreator));
-
-            try
-            {
-                await asyncActionCreator(State, this, actionCreator =>
-                {
-                    var action = actionCreator(State, this);
-                    if (action != null)
-                    {
-                        dispatcher(action);
-                    }
-                }).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                OnError(ex);
-            }
-        }
-
         /// <summary>
         /// Dispatches an action.
         /// </summary>
@@ -186,7 +52,7 @@ namespace ReduxSharp
         /// <returns>A task that represents the asynchronous dispatch actions.</returns>
         public async ValueTask Dispatch<TAction>(TAction action)
         {
-            await internalDispatcher.Invoke(action)
+            await dispatcher.Invoke(action)
                 .ConfigureAwait(false);
         }
 
