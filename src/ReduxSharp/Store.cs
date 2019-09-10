@@ -19,7 +19,9 @@ namespace ReduxSharp
 
         readonly Dispatcher dispatcher;
 
-        readonly PipelinedDispatcher internalDispatcher;
+        readonly DispatchPipeline internalDispatcher;
+
+        readonly AsyncLock writeLock = new AsyncLock();
 
         ObserverNode<TState> root;
 
@@ -56,7 +58,7 @@ namespace ReduxSharp
         {
             if (reducer == null) throw new ArgumentNullException(nameof(reducer));
 
-            internalDispatcher = new PipelinedDispatcher(this, reducer, middlewares);
+            internalDispatcher = new DispatchPipeline(this, reducer, middlewares);
             if (initialState != default)
             {
                 State = initialState;
@@ -180,76 +182,79 @@ namespace ReduxSharp
                 .ConfigureAwait(false);
         }
 
-		sealed class MiddlewareWrapper : IDispatcher
-		{
-			readonly IMiddleware<TState> middleware;
-
-			readonly IDispatcher next;
-
-			readonly Store<TState> store;
-
-			public MiddlewareWrapper(IMiddleware<TState> middleware, Store<TState> store, IDispatcher next)
-			{
-				this.store = store;
-				this.next = next;
-				this.middleware = middleware;
-			}
-
-			public async ValueTask Invoke<TAction>(TAction action)
-			{
-				await middleware.Invoke(store, next, action).ConfigureAwait(false);
-			}
-		}
-
-		sealed class DispatcherCore : IDispatcher
-		{
-			readonly IReducer<TState> reducer;
-
-			readonly Store<TState> store;
-
-			public DispatcherCore(Store<TState>store, IReducer<TState>reducer)
-			{
-				this.store = store;
-				this.reducer = reducer;
-			}
-
-			public async ValueTask Invoke<TAction>(TAction action)
-			{
-				try
-				{
-					var currentState = store.State;
-					var nextState = await reducer.Invoke(currentState, action)
-						.ConfigureAwait(false);
-					store.State = nextState;
-					store.OnNext(nextState);
-				}
-				catch (Exception ex)
-				{
-					store.OnError(ex);
-				}
-			}
-		}
-
-		sealed class PipelinedDispatcher : IDispatcher
+        sealed class MiddlewareDispatcher : IDispatcher
         {
-            readonly IDispatcher innerDispatcher;
+            readonly IMiddleware<TState> middleware;
 
-            public PipelinedDispatcher(
-                Store<TState> store,
-                IReducer<TState> reducer,
-                IMiddleware<TState>[] middlewares)
+            readonly IDispatcher next;
+
+            readonly IStore<TState> store;
+
+            public MiddlewareDispatcher(IMiddleware<TState> middleware, IStore<TState> store, IDispatcher next)
             {
-				IDispatcher next = new DispatcherCore(store, reducer);
-				foreach(var middleware in middlewares.Reverse())
-				{
-					next = new MiddlewareWrapper(middleware, store, next);
-				}
-				innerDispatcher = next;
+                this.store = store;
+                this.next = next;
+                this.middleware = middleware;
             }
 
             public async ValueTask Invoke<TAction>(TAction action)
             {
-				await innerDispatcher.Invoke(action).ConfigureAwait(false);
+                await middleware.Invoke(store, next, action).ConfigureAwait(false);
+            }
+        }
+
+        sealed class ActionDispatcher : IDispatcher
+        {
+            readonly IReducer<TState> reducer;
+
+            readonly Store<TState> store;
+
+            public ActionDispatcher(Store<TState> store, IReducer<TState> reducer)
+            {
+                this.store = store;
+                this.reducer = reducer;
+            }
+
+            public async ValueTask Invoke<TAction>(TAction action)
+            {
+                using (await store.writeLock.LockAsync())
+                {
+                    try
+                    {
+                        var currentState = store.State;
+                        var nextState = await reducer.Invoke(currentState, action)
+                            .ConfigureAwait(false);
+                        store.State = nextState;
+                        store.OnNext(store.State);
+                    }
+                    catch (Exception ex)
+                    {
+                        store.OnError(ex);
+                    }
+                }
+            }
+        }
+
+        sealed class DispatchPipeline : IDispatcher
+        {
+            readonly IDispatcher innerDispatcher;
+
+            public DispatchPipeline(
+                Store<TState> store,
+                IReducer<TState> reducer,
+                IMiddleware<TState>[] middlewares)
+            {
+                IDispatcher next = new ActionDispatcher(store, reducer);
+                foreach (var middleware in middlewares.Reverse())
+                {
+                    next = new MiddlewareDispatcher(middleware, store, next);
+                }
+                innerDispatcher = next;
+            }
+
+            public async ValueTask Invoke<TAction>(TAction action)
+            {
+                await innerDispatcher.Invoke(action).ConfigureAwait(false);
             }
         }
 
