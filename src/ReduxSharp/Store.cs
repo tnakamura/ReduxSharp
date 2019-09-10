@@ -15,8 +15,10 @@ namespace ReduxSharp
     {
         readonly object syncRoot = new object();
 
+        [Obsolete]
         readonly Reducer<TState> reducer;
 
+        [Obsolete]
         readonly Dispatcher dispatcher;
 
         readonly DispatchPipeline internalDispatcher;
@@ -39,6 +41,7 @@ namespace ReduxSharp
         /// <param name="middlewares">
         /// Functions that conform to the Redux middleware API.
         /// </param>
+        [Obsolete]
         public Store(Reducer<TState> reducer, TState initialState = default, params Middleware<TState>[] middlewares)
         {
             this.reducer = reducer ?? throw new ArgumentNullException(nameof(reducer));
@@ -76,6 +79,7 @@ namespace ReduxSharp
         /// </summary>
         public TState State { get; private set; }
 
+        [Obsolete]
         Dispatcher ApplyMiddlewares(IEnumerable<Middleware<TState>> middlewares)
         {
             return middlewares
@@ -94,6 +98,7 @@ namespace ReduxSharp
         /// <param name="action">
         /// An object describing the change that makes sense for your application.
         /// </param>
+        [Obsolete]
         public void Dispatch(IAction action)
         {
             if (action == null) throw new ArgumentNullException(nameof(action));
@@ -108,6 +113,7 @@ namespace ReduxSharp
             }
         }
 
+        [Obsolete]
         void InternalDispatch(IAction action)
         {
             lock (syncRoot)
@@ -123,6 +129,7 @@ namespace ReduxSharp
         /// <param name="actionCreator">
         /// A function that creates an action.
         /// </param>
+        [Obsolete]
         public void Dispatch(ActionCreator<TState> actionCreator)
         {
             if (actionCreator == null) throw new ArgumentNullException(nameof(actionCreator));
@@ -148,6 +155,7 @@ namespace ReduxSharp
         /// A function that creates and dispatches actions asynchronously.
         /// </param>
         /// <returns>A task that represents the asynchronous dispatch actions.</returns>
+        [Obsolete]
         public async Task Dispatch(AsyncActionCreator<TState> asyncActionCreator)
         {
             if (asyncActionCreator == null) throw new ArgumentNullException(nameof(asyncActionCreator));

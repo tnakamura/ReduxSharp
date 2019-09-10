@@ -10,7 +10,7 @@ namespace ReduxSharp.Tests
 		}
 	}
 
-    public class DummyAction : IAction
+    public class DummyAction
     {
     }
 

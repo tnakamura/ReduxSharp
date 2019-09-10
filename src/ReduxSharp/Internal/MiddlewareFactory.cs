@@ -4,6 +4,7 @@ using System.Reflection;
 
 namespace ReduxSharp.Internal
 {
+    [Obsolete]
     internal static class MiddlewareFactory
     {
         const string InvokeMethodName = "Invoke";

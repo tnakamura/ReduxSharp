@@ -11,6 +11,7 @@ namespace ReduxSharp
     /// <param name="store">A store</param>
     /// <param name="actionCreatorCallback">A dispatch function</param>
     /// <returns>A task that represents the asynchronous dispatch actions.</returns>
+    [Obsolete]
     public delegate Task AsyncActionCreator<TState>(
         TState state,
         IStore<TState> store,

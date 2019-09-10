@@ -28,6 +28,7 @@ namespace ReduxSharp
         /// </summary>
         /// <param name="middleware">The middleware delegate.</param>
         /// <returns>The <see cref="IStoreBuilder{TState}"/>.</returns>
+        [Obsolete]
         IStoreBuilder<TState> UseMiddleware(Middleware<TState> middleware);
 
         /// <summary>
@@ -36,6 +37,7 @@ namespace ReduxSharp
         /// <typeparam name="TMiddleware">The middleware type.</typeparam>
         /// <param name="args">The arguments to pass to the middleware type instance's constructor.</param>
         /// <returns>The <see cref="IStoreBuilder{TState}"/> instance.</returns>
+        [Obsolete]
         IStoreBuilder<TState> UseMiddleware<TMiddleware>(params object[] args);
 
         /// <summary>
@@ -44,6 +46,7 @@ namespace ReduxSharp
         /// <param name="middleware">The middleware type.</param>
         /// <param name="args">The arguments to pass to the middleware type instance's constructor.</param>
         /// <returns>The <see cref="IStoreBuilder{TState}"/> instance.</returns>
+        [Obsolete]
         IStoreBuilder<TState> UseMiddleware(Type middleware, params object[] args);
 
         /// <summary>

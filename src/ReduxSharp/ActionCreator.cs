@@ -1,4 +1,6 @@
-﻿namespace ReduxSharp
+﻿using System;
+
+namespace ReduxSharp
 {
     /// <summary>
     /// A function that creates an action.
@@ -7,5 +9,6 @@
     /// <param name="state">A state object</param>
     /// <param name="store">A store</param>
     /// <returns>An action object</returns>
+    [Obsolete]
     public delegate IAction ActionCreator<TState>(TState state, IStore<TState> store);
 }

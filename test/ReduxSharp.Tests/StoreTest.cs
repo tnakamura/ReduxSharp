@@ -119,12 +119,12 @@ namespace ReduxSharp.Tests
         [Fact]
         public async Task DispatchThreadSafeTest()
         {
-            var store = new Store<AppState>(AppReducer.Invoke, new AppState());
+            var store = new Store<AppState>(new AsyncAppReducer(), new AppState());
 
-            await Task.WhenAll(Enumerable.Range(0, 1000).Select(_ => Task.Run(() =>
+            await Task.WhenAll(Enumerable.Range(0, 1000).Select(async _ =>
             {
-                store.Dispatch((IAction)new AppState.IncrementAction());
-            })));
+                await store.Dispatch(new AppState.IncrementAction());
+            }));
 
             Assert.Equal(1000, store.State.Count);
         }

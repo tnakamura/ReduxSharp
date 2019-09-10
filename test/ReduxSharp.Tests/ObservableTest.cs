@@ -1,6 +1,7 @@
 ﻿using System;
-using ReduxSharp.Linq;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using ReduxSharp.Linq;
 using Xunit;
 
 namespace ReduxSharp.Tests
@@ -12,40 +13,47 @@ namespace ReduxSharp.Tests
             public int Count { get; set; }
         }
 
-        public class IncrementAction : IAction { }
+        public class IncrementAction { }
 
-        public class ReplaceAction : IAction
+        public class ReplaceAction
         {
             public ReplaceAction(int count) => Count = count;
 
             public int Count { get; }
         }
 
-        public static class AppReducer
+        public class AppReducer : IReducer<AppState>
         {
-            public static AppState Invoke(AppState state, IAction action)
+            public async ValueTask<AppState> Invoke<TAction>(AppState state, TAction action)
             {
                 state = state ?? new AppState() { Count = 0 };
 
                 switch (action)
                 {
                     case IncrementAction _:
-                        state.Count += 1;
-                        break;
+                        return await Task.Run(() =>
+                        {
+                            return new AppState
+                            {
+                                Count = state.Count + 1,
+                            };
+                        });
                     case ReplaceAction a:
-                        state.Count = a.Count;
-                        break;
+                        return new AppState
+                        {
+                            Count = a.Count,
+                        };
+                    default:
+                        return state;
                 }
-
-                return state;
             }
         }
 
         [Fact]
-        public void SelectTest()
+        public async Task SelectTest()
         {
             var values = new List<int>();
-            var store = new Store<AppState>(AppReducer.Invoke);
+            var store = new Store<AppState>(new AppReducer(), new AppState());
             store.Select(s => s.Count).Subscribe(new ActionObserver<int>()
             {
                 Next = (value) =>
@@ -54,9 +62,9 @@ namespace ReduxSharp.Tests
                 }
             });
 
-            store.Dispatch((IAction)new IncrementAction());
-            store.Dispatch((IAction)new IncrementAction());
-            store.Dispatch((IAction)new IncrementAction());
+            await store.Dispatch(new IncrementAction());
+            await store.Dispatch(new IncrementAction());
+            await store.Dispatch(new IncrementAction());
 
             Assert.Equal(1, values[0]);
             Assert.Equal(2, values[1]);
@@ -66,7 +74,7 @@ namespace ReduxSharp.Tests
         [Fact]
         public void Select_throws_ArgumentNullException_when_selector_is_null()
         {
-            var store = new Store<AppState>(AppReducer.Invoke);
+            var store = new Store<AppState>(new AppReducer(), new AppState());
             Assert.Throws<ArgumentNullException>(() =>
             {
                 store.Select<AppState, int>(null);
@@ -83,10 +91,10 @@ namespace ReduxSharp.Tests
         }
 
         [Fact]
-        public void DistinctUntilChangedTest()
+        public async Task DistinctUntilChangedTest()
         {
             var values = new List<int>();
-            var store = new Store<AppState>(AppReducer.Invoke);
+            var store = new Store<AppState>(new AppReducer(), new AppState());
             store.Select(s => s.Count)
                 .DistinctUntilChanged()
                 .Subscribe(new ActionObserver<int>()
@@ -97,12 +105,12 @@ namespace ReduxSharp.Tests
                     }
                 });
 
-            store.Dispatch((IAction)new ReplaceAction(1));
-            store.Dispatch((IAction)new ReplaceAction(1));
-            store.Dispatch((IAction)new ReplaceAction(2));
-            store.Dispatch((IAction)new ReplaceAction(2));
-            store.Dispatch((IAction)new ReplaceAction(3));
-            store.Dispatch((IAction)new ReplaceAction(3));
+            await store.Dispatch(new ReplaceAction(1));
+            await store.Dispatch(new ReplaceAction(1));
+            await store.Dispatch(new ReplaceAction(2));
+            await store.Dispatch(new ReplaceAction(2));
+            await store.Dispatch(new ReplaceAction(3));
+            await store.Dispatch(new ReplaceAction(3));
 
             Assert.Equal(1, values[0]);
             Assert.Equal(2, values[1]);
@@ -125,7 +133,7 @@ namespace ReduxSharp.Tests
         [Fact]
         public void DistinctUntilChanged_throws_ArgumentNullException_when_comparer_is_null()
         {
-            var store = new Store<AppState>(AppReducer.Invoke);
+            var store = new Store<AppState>(new AppReducer(), new AppState());
             Assert.Throws<ArgumentNullException>(() =>
             {
                 store.DistinctUntilChanged(null);

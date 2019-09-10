@@ -8,14 +8,6 @@ namespace ReduxSharp.Tests
     {
         public class AppState { }
 
-        public static class AppReducer
-        {
-            public static AppState Invoke(AppState state, IAction action)
-            {
-                return state ?? new AppState();
-            }
-        }
-
         public class AsyncAppReducer : IReducer<AppState>
         {
             public ValueTask<AppState> Invoke<TAction>(AppState state, TAction action)

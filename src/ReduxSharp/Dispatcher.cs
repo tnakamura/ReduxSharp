@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace ReduxSharp
 {
@@ -8,6 +9,7 @@ namespace ReduxSharp
     /// <param name="action">
     /// An object describing the change that makes sense for your application.
     /// </param>
+    [Obsolete]
     public delegate void Dispatcher(IAction action);
 
     /// <summary>

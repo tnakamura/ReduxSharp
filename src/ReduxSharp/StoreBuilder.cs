@@ -10,6 +10,7 @@ namespace ReduxSharp
     /// <typeparam name="TState">A type of root state tree</typeparam>
     public sealed class StoreBuilder<TState> : IStoreBuilder<TState>
     {
+        [Obsolete]
         readonly Reducer<TState> reducer;
 
         readonly IReducer<TState> reducerObject;
@@ -17,6 +18,7 @@ namespace ReduxSharp
         readonly List<IMiddleware<TState>> middlewareObjects =
             new List<IMiddleware<TState>>();
 
+        [Obsolete]
         readonly List<Middleware<TState>> middlewares =
             new List<Middleware<TState>>();
 
@@ -28,6 +30,7 @@ namespace ReduxSharp
         /// <param name="reducer">
         /// A reducing function that returns the next state tree.
         /// </param>
+        [Obsolete]
         public StoreBuilder(Reducer<TState> reducer)
         {
             this.reducer = reducer ?? throw new ArgumentNullException(nameof(reducer));
@@ -62,6 +65,7 @@ namespace ReduxSharp
         /// </summary>
         /// <param name="middleware">The middleware delegate.</param>
         /// <returns>The <see cref="IStoreBuilder{TState}"/> instance.</returns>
+        [Obsolete]
         public IStoreBuilder<TState> UseMiddleware(Middleware<TState> middleware)
         {
             if (middleware == null) throw new ArgumentNullException(nameof(middleware));
@@ -85,10 +89,12 @@ namespace ReduxSharp
             }
             else
             {
+#pragma warning disable CS0612
                 return new Store<TState>(
                     reducer,
                     initialState,
                     middlewares.ToArray());
+#pragma warning restore CS0612
             }
         }
 
@@ -98,6 +104,7 @@ namespace ReduxSharp
         /// <typeparam name="TMiddleware">The middleware type.</typeparam>
         /// <param name="args">The arguments to pass to the middleware type instance's constructor.</param>
         /// <returns>The <see cref="IStoreBuilder{TState}"/> instance.</returns>
+        [Obsolete]
         public IStoreBuilder<TState> UseMiddleware<TMiddleware>(params object[] args)
         {
             return UseMiddleware(typeof(TMiddleware), args);
@@ -109,6 +116,7 @@ namespace ReduxSharp
         /// <param name="middleware">The middleware type.</param>
         /// <param name="args">The arguments to pass to the middleware type instance's constructor.</param>
         /// <returns>The <see cref="IStoreBuilder{TState}"/> instance.</returns>
+        [Obsolete]
         public IStoreBuilder<TState> UseMiddleware(Type middleware, params object[] args)
         {
             if (middleware == null) throw new ArgumentNullException(nameof(middleware));
