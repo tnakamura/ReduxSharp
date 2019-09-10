@@ -24,26 +24,10 @@ namespace ReduxSharp
         IStoreBuilder<TState> UseInitialState(TState initialState);
 
         /// <summary>
-        /// Adds a middleware delegate to the store's dispatch pipeline.
+        /// Adds a middleware instance to the store's dispatch pipeline.
         /// </summary>
-        /// <param name="middleware">The middleware delegate.</param>
-        /// <returns>The <see cref="IStoreBuilder{TState}"/>.</returns>
-        IStoreBuilder<TState> UseMiddleware(Middleware<TState> middleware);
-
-        /// <summary>
-        /// Adds a middleware type to the store's dispatch pipeline.
-        /// </summary>
-        /// <typeparam name="TMiddleware">The middleware type.</typeparam>
-        /// <param name="args">The arguments to pass to the middleware type instance's constructor.</param>
+        /// <param name="middleware">The middleware instance.</param>
         /// <returns>The <see cref="IStoreBuilder{TState}"/> instance.</returns>
-        IStoreBuilder<TState> UseMiddleware<TMiddleware>(params object[] args);
-
-        /// <summary>
-        /// Adds a middleware type to the store's dispatch pipeline.
-        /// </summary>
-        /// <param name="middleware">The middleware type.</param>
-        /// <param name="args">The arguments to pass to the middleware type instance's constructor.</param>
-        /// <returns>The <see cref="IStoreBuilder{TState}"/> instance.</returns>
-        IStoreBuilder<TState> UseMiddleware(Type middleware, params object[] args);
+        IStoreBuilder<TState> UseMiddleware(IMiddleware<TState> middleware);
     }
 }

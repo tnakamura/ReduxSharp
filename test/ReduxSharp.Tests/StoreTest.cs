@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Xunit;
 
 namespace ReduxSharp.Tests
@@ -12,50 +12,26 @@ namespace ReduxSharp.Tests
         public class AppState
         {
             public int Count { get; set; }
-
-            public class IncrementAction : IAction { }
         }
 
-        public static class AppActionCreators
+        public class IncrementAction { }
+
+        public class DecrementAction { }
+
+        public class RaiseExceptionAction
         {
-            public static ActionCreator<AppState> Increment()
+            public Exception Exception { get; }
+
+            public RaiseExceptionAction(Exception exception)
             {
-                return (state, store) =>
-                {
-                    return new AppState.IncrementAction();
-                };
-            }
-
-            public static AsyncActionCreator<AppState> IncrementTwice()
-            {
-                return async (state, store, callback) =>
-                {
-                    callback(Increment());
-                    await Task.Delay(10);
-                    callback(Increment());
-                };
-            }
-        }
-
-        public static class AppReducer
-        {
-            public static AppState Invoke(AppState state, IAction action)
-            {
-                state = state ?? new AppState() { Count = 0 };
-
-                if (action is AppState.IncrementAction)
-                {
-                    state.Count += 1;
-                }
-
-                return state;
+                Exception = exception;
             }
         }
 
         [Fact]
         public void ConstructorTest()
         {
-            var store = new Store<AppState>(AppReducer.Invoke);
+            var store = new Store<AppState>(new AsyncAppReducer(), default);
             Assert.NotNull(store);
         }
 
@@ -64,92 +40,35 @@ namespace ReduxSharp.Tests
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                new Store<AppState>(null);
+                new Store<AppState>(null as IReducer<AppState>, default);
             });
         }
 
         [Fact]
-        public void DispatchNullActiontest()
+        public async Task DispatchActionTest()
         {
-            var store = new Store<AppState>(AppReducer.Invoke);
-            Assert.Throws<ArgumentNullException>(() =>
-            {
-                store.Dispatch(default(IAction));
-            });
-        }
-
-        [Fact]
-        public void DispatchActionTest()
-        {
-            var store = new Store<AppState>(AppReducer.Invoke);
-            store.Dispatch(new AppState.IncrementAction());
+            var store = new Store<AppState>(new AsyncAppReducer(), new AppState());
+            await store.Dispatch(new IncrementAction());
             Assert.Equal(1, store.State.Count);
-        }
-
-        [Fact]
-        public void DispatchActionCreatorTest()
-        {
-            var store = new Store<AppState>(AppReducer.Invoke);
-            store.Dispatch(AppActionCreators.Increment());
-            Assert.Equal(1, store.State.Count);
-        }
-
-        [Fact]
-        public async Task DispatchAsyncActionCreatorTest()
-        {
-            var store = new Store<AppState>(AppReducer.Invoke);
-            await store.Dispatch(AppActionCreators.IncrementTwice());
-            Assert.Equal(2, store.State.Count);
-        }
-
-        [Fact]
-        public void DispatchNullActionCreatorTest()
-        {
-            var store = new Store<AppState>(AppReducer.Invoke);
-            ActionCreator<AppState> actionCreator = null;
-            Assert.Throws<ArgumentNullException>(() =>
-            {
-                store.Dispatch(actionCreator);
-            });
-        }
-
-        [Fact]
-        public async Task DispatchNullAsyncActionCreatorTest()
-        {
-            var store = new Store<AppState>(AppReducer.Invoke);
-            AsyncActionCreator<AppState> asyncActionCreator = null;
-            await Assert.ThrowsAsync<ArgumentNullException>(async () =>
-            {
-                await store.Dispatch(asyncActionCreator);
-            });
         }
 
         [Fact]
         public async Task DispatchThreadSafeTest()
         {
-            var store = new Store<AppState>(AppReducer.Invoke, new AppState());
+            var store = new Store<AppState>(new AsyncAppReducer(), new AppState());
 
-            await Task.WhenAll(Enumerable.Range(0, 1000).Select(_ => Task.Run(() =>
-              {
-                  store.Dispatch(new AppState.IncrementAction());
-              })));
+            await Task.WhenAll(Enumerable.Range(0, 1000).Select(async _ =>
+            {
+                await store.Dispatch(new IncrementAction());
+            }));
 
             Assert.Equal(1000, store.State.Count);
         }
 
         [Fact]
-        public void DispatchHandleExceptionTest()
+        public async Task DispatchHandleExceptionTest()
         {
-            AppState Reducer(AppState state, IAction action)
-            {
-                if (action is StandardAction std && std.Type == "test")
-                {
-                    throw new NotSupportedException();
-                }
-                return state ?? new AppState();
-            }
-
-            var store = new Store<AppState>(Reducer, new AppState());
+            var store = new Store<AppState>(new AsyncAppReducer(), new AppState());
 
             Exception actual = null;
             var observer = new ActionObserver<AppState>()
@@ -161,137 +80,171 @@ namespace ReduxSharp.Tests
             };
             store.Subscribe(observer);
 
-            store.Dispatch(new StandardAction("test"));
+            await store.Dispatch(
+                new RaiseExceptionAction(
+                    new NotSupportedException()));
 
             Assert.NotNull(actual);
             Assert.IsType<NotSupportedException>(actual);
         }
 
-        [Fact]
-        public void DispatchActionCreatorHandleExceptionTest()
+        public class AsyncAppReducer : IReducer<AppState>
         {
-            AppState Reducer(AppState state, IAction action)
+            public async ValueTask<AppState> Invoke<TAction>(AppState state, TAction action)
             {
-                if (action is StandardAction std && std.Type == "test")
+                state = state ?? new AppState
                 {
-                    throw new NotSupportedException();
+                    Count = 0,
+                };
+
+                switch (action)
+                {
+                    case IncrementAction _:
+                        return await Task.Run(() =>
+                        {
+                            return new AppState
+                            {
+                                Count = state.Count + 1,
+                            };
+                        });
+                    case DecrementAction _:
+                        return await Task.Run(() =>
+                        {
+                            return new AppState
+                            {
+                                Count = state.Count - 1,
+                            };
+                        });
+                    case RaiseExceptionAction e:
+                        throw e.Exception;
+                    default:
+                        return state;
                 }
-                return state ?? new AppState();
+            }
+        }
+
+        public class AsyncLogMiddleware<TState> : IMiddleware<TState>
+        {
+            public List<string> Logs { get; } = new List<string>();
+
+            public async ValueTask Invoke<TAction>(
+                IStore<TState> store,
+                IDispatcher next,
+                TAction action)
+            {
+                Logs.Add($"Executing {action.GetType().Name}");
+
+                await next.Invoke(action).ConfigureAwait(false);
+
+                Logs.Add($"Executed {action.GetType().Name}");
+            }
+        }
+
+        public class TimeTravelMiddleweare<TState> : IMiddleware<TState>
+        {
+            public List<History> Histories { get; } = new List<History>();
+
+            public async ValueTask Invoke<TAction>(
+                IStore<TState> store,
+                IDispatcher next,
+                TAction action)
+            {
+                var history = new History();
+                history.Action = JsonConvert.SerializeObject(action);
+                history.BeforeState = JsonConvert.SerializeObject(store.State);
+                Histories.Add(history);
+
+                await next.Invoke(action);
+
+                history.AfterState = JsonConvert.SerializeObject(store.State);
             }
 
-            var store = new Store<AppState>(Reducer, new AppState());
-
-            Exception actual = null;
-            var observer = new ActionObserver<AppState>()
+            public class History
             {
-                Error = (error) =>
-                {
-                    actual = error;
-                }
-            };
-            store.Subscribe(observer);
+                public string BeforeState { get; set; }
 
-            store.Dispatch((_, __) => new StandardAction("test"));
+                public string AfterState { get; set; }
 
-            Assert.NotNull(actual);
-            Assert.IsType<NotSupportedException>(actual);
+                public string Action { get; set; }
+            }
         }
 
         [Fact]
-        public void DispatchActionCreatorThatThrowsExcepitionHandleExceptionTest()
+        public async Task DispatchAsyncActionTest()
         {
-            AppState Reducer(AppState state, IAction action)
-            {
-                return state ?? new AppState();
-            }
-
-            var store = new Store<AppState>(Reducer, new AppState());
-
-            Exception actual = null;
-            var observer = new ActionObserver<AppState>()
-            {
-                Error = (error) =>
-                {
-                    actual = error;
-                }
-            };
-            store.Subscribe(observer);
-
-            store.Dispatch((_, __) =>
-            {
-                throw new NotSupportedException();
-            });
-
-            Assert.NotNull(actual);
-            Assert.IsType<NotSupportedException>(actual);
+            var store = new Store<AppState>(new AsyncAppReducer(), new AppState());
+            await store.Dispatch(new IncrementAction());
+            Assert.Equal(1, store.State.Count);
         }
 
         [Fact]
-        public async Task DispatchAsyncActionCreatorHandleExceptionTest()
+        public async Task MiddlewareTest()
         {
-            AppState Reducer(AppState state, IAction action)
-            {
-                if (action is StandardAction std && std.Type == "test")
-                {
-                    throw new NotSupportedException();
-                }
-                return state ?? new AppState();
-            }
+            var middleware = new AsyncLogMiddleware<AppState>();
+            var store = new Store<AppState>(
+                new AsyncAppReducer(),
+                new AppState(),
+                middleware);
 
-            var asyncActionCreator = new AsyncActionCreator<AppState>(async (_, __, callback) =>
-              {
-                  await Task.FromResult(0);
-                  callback((x, y) => new StandardAction("test"));
-              });
+            await store.Dispatch(new IncrementAction());
 
-            var store = new Store<AppState>(Reducer, new AppState());
-
-            Exception actual = null;
-            var observer = new ActionObserver<AppState>()
-            {
-                Error = (error) =>
-                {
-                    actual = error;
-                }
-            };
-            store.Subscribe(observer);
-
-            await store.Dispatch(asyncActionCreator);
-
-            Assert.NotNull(actual);
-            Assert.IsType<NotSupportedException>(actual);
+            Assert.Equal(1, store.State.Count);
+            Assert.Equal(2, middleware.Logs.Count);
+            Assert.Equal("Executing IncrementAction", middleware.Logs[0]);
+            Assert.Equal("Executed IncrementAction", middleware.Logs[1]);
         }
 
         [Fact]
-        public async Task DispatchAsyncActionCreatorThatThrowsExcepitionHandleExceptionTest()
+        public async Task TimeTravelTest()
         {
-            AppState Reducer(AppState state, IAction action)
+            var middleware = new TimeTravelMiddleweare<AppState>();
+            var store = new Store<AppState>(
+                new AsyncAppReducer(),
+                new AppState(),
+                middleware);
+
+            await store.Dispatch(new IncrementAction());
+            await store.Dispatch(new IncrementAction());
+            await store.Dispatch(new DecrementAction());
+            await store.Dispatch(new IncrementAction());
+
+            Assert.Equal(2, store.State.Count);
+            Assert.Equal(4, middleware.Histories.Count);
+
+            Assert.NotNull(JsonConvert.DeserializeObject<IncrementAction>(middleware.Histories[0].Action));
+            Assert.Equal(0, JsonConvert.DeserializeObject<AppState>(middleware.Histories[0].BeforeState).Count);
+            Assert.Equal(1, JsonConvert.DeserializeObject<AppState>(middleware.Histories[0].AfterState).Count);
+
+            Assert.NotNull(JsonConvert.DeserializeObject<IncrementAction>(middleware.Histories[1].Action));
+            Assert.Equal(1, JsonConvert.DeserializeObject<AppState>(middleware.Histories[1].BeforeState).Count);
+            Assert.Equal(2, JsonConvert.DeserializeObject<AppState>(middleware.Histories[1].AfterState).Count);
+
+            Assert.NotNull(JsonConvert.DeserializeObject<DecrementAction>(middleware.Histories[2].Action));
+            Assert.Equal(2, JsonConvert.DeserializeObject<AppState>(middleware.Histories[2].BeforeState).Count);
+            Assert.Equal(1, JsonConvert.DeserializeObject<AppState>(middleware.Histories[2].AfterState).Count);
+
+            Assert.NotNull(JsonConvert.DeserializeObject<IncrementAction>(middleware.Histories[3].Action));
+            Assert.Equal(1, JsonConvert.DeserializeObject<AppState>(middleware.Histories[3].BeforeState).Count);
+            Assert.Equal(2, JsonConvert.DeserializeObject<AppState>(middleware.Histories[3].AfterState).Count);
+        }
+
+        [Fact]
+        public async Task ThunkTest()
+        {
+            var middleware = new ThunkMiddleware<AppState>();
+            var store = new Store<AppState>(
+                new AsyncAppReducer(),
+                new AppState(),
+                middleware);
+
+            await store.Dispatch(new Func<IDispatcher, ValueTask>(async d =>
             {
-                return state ?? new AppState();
-            }
+                await d.Invoke(new IncrementAction());
+                await d.Invoke(new IncrementAction());
+                await d.Invoke(new IncrementAction());
+            }));
 
-            var asyncActionCreator = new AsyncActionCreator<AppState>(async (_, __, callback) =>
-            {
-                await Task.Yield();
-                throw new NotSupportedException();
-            });
-
-            var store = new Store<AppState>(Reducer, new AppState());
-
-            Exception actual = null;
-            var observer = new ActionObserver<AppState>()
-            {
-                Error = (error) =>
-                {
-                    actual = error;
-                }
-            };
-            store.Subscribe(observer);
-
-            await store.Dispatch(asyncActionCreator);
-
-            Assert.NotNull(actual);
-            Assert.IsType<NotSupportedException>(actual);
+            Assert.Equal(3, store.State.Count);
         }
     }
 }

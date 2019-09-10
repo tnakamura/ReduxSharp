@@ -12,7 +12,7 @@ namespace RxCounter
 
         static App()
         {
-            Store = new StoreBuilder<AppState>(AppReducer.Invoke)
+            Store = new StoreBuilder<AppState>(new AppReducer())
                 .UseInitialState(new AppState())
                 .Build();
         }

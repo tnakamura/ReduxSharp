@@ -6,7 +6,7 @@ namespace ReduxSharp
     /// <summary>
     /// ReduxSharp's built in action type.
     /// </summary>
-    public sealed class StandardAction : IAction
+    public sealed class StandardAction
     {
         /// <summary>
         /// Initializes a new instance of <see cref="StandardAction"/> class.

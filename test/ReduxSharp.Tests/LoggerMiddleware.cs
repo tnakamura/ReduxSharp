@@ -1,26 +1,23 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ReduxSharp.Tests
 {
-    public class LoggerMiddleware<TState>
+    public class LoggerMiddleware<TState> : IMiddleware<TState>
     {
-        readonly IStore<TState> store;
-        readonly Dispatcher next;
         readonly LoggerOptions options;
 
-        public LoggerMiddleware(IStore<TState> store, Dispatcher next, LoggerOptions options)
+        public LoggerMiddleware(LoggerOptions options)
         {
-            this.store = store;
-            this.next = next;
             this.options = options;
         }
 
-        public void Invoke(IAction action)
-        {
-            options.Buffer.Add(action.GetType().FullName);
-            next(action);
-        }
-    }
+		public async ValueTask Invoke<TAction>(IStore<TState> store, IDispatcher next, TAction action)
+		{
+			options.Buffer.Add(action.GetType().FullName);
+			await next.Invoke(action);
+		}
+	}
 
     public class LoggerOptions
     {
@@ -31,7 +28,7 @@ namespace ReduxSharp.Tests
     {
         public static IStoreBuilder<TState> UseLogger<TState>(this IStoreBuilder<TState> store, LoggerOptions options)
         {
-            return store.UseMiddleware<LoggerMiddleware<TState>>(options);
+            return store.UseMiddleware(new LoggerMiddleware<TState>(options));
         }
     }
 }

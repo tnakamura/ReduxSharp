@@ -19,7 +19,6 @@ PM> Install-Package ReduxSharp
 ### Actions
 
 Actions are payloads of information that send data from your application to your store.
-They only need to implement the markup interface `IAction`.
 
 ```cs
 using System;
@@ -27,15 +26,15 @@ using ReduxSharp;
 
 namespace ReduxSharpSample
 {
-    public class IncrementAction : IAction {}
+    public class IncrementAction {}
 
-    public class DecrementAction : IAction {}
+    public class DecrementAction {}
 }
 ```
 
 ### Reducers
 
-A reducer is a pure function with `(TState state, IAction action) => TState` signature.
+A reducer need to implement the interface `IReducer<TState>`.
 It describes how an action transforms the state into the next state.
 
 ```cs
@@ -44,26 +43,27 @@ using ReduxSharp;
 
 namespace ReduxSharpSample
 {
-    public static class AppReducer
+    public class AppReducer : IReducer<AppState>
     {
-        public static AppState Invoke(AppState state, IAction action)
+        public async ValueTask<AppState> Invoke<TAction>(AppState state, TAction action)
         {
             if (action is IncrementAction)
             {
-                return new AppState()
+                return await Task.Run(() =>
                 {
-                    Count = state.Count + 1
-                };
+                    return new AppState
+                    {
+                        Count = state.Count + 1
+                    };
+                });
             }
-
             if (action is DecrementAction)
             {
-                return new AppState()
+                return new AppState
                 {
                     Count = state.Count - 1
                 };
             }
-
             return state;
         }
     }
@@ -104,18 +104,18 @@ namespace ReduxSharpSample
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
-            IStore<AppState> store = new StoreBuilder<AppState>(AppReducer.Invoke)
+            IStore<AppState> store = new StoreBuilder<AppState>(new AppReducer())
                 .UseInitialState(new AppState())
                 .Build();
 
             Console.WriteLine(store.State.Count); // => 0
 
-            store.Dispatch(new IncrementAction());
+            await store.Dispatch(new IncrementAction());
             Console.WriteLine(store.State.Count); // => 1
 
-            store.Dispatch(new DecrementAction());
+            await store.Dispatch(new DecrementAction());
             Console.WriteLine(store.State.Count); // => 0
         }
     } 

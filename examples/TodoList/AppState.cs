@@ -31,7 +31,7 @@ namespace TodoList
         public List<Todo> Todos { get; set; } = new List<Todo>();
     }
 
-    public class AddTodoAction : IAction
+    public class AddTodoAction
     {
         public AddTodoAction(string todo)
         {
@@ -41,7 +41,7 @@ namespace TodoList
         public string Todo { get; }
     }
 
-    public class CompleteTodoAction : IAction
+    public class CompleteTodoAction
     {
         public CompleteTodoAction(string todoId)
         {
@@ -51,7 +51,7 @@ namespace TodoList
         public string TodoId { get; }
     }
 
-    public class DeleteTodoAction : IAction
+    public class DeleteTodoAction
     {
         public DeleteTodoAction(string todoId)
         {
@@ -61,21 +61,30 @@ namespace TodoList
         public string TodoId { get; }
     }
 
-    public static class TodoManagerReducer
+    public class TodoManagerReducer : IReducer<AppState>
     {
-        public static AppState Invoke(AppState state, IAction action)
+        public async ValueTask<AppState> Invoke<TAction>(AppState state, TAction action)
         {
             switch (action)
             {
                 case AddTodoAction a:
-                    state.TodoManager = AddTodo(state.TodoManager, a);
-                    break;
+                    return await Task.Run(() =>
+                    {
+                        return new AppState
+                        {
+                            TodoManager = AddTodo(state.TodoManager, a)
+                        };
+                    });
                 case CompleteTodoAction a:
-                    state.TodoManager = CompleteTodo(state.TodoManager, a);
-                    break;
+                    return new AppState
+                    {
+                        TodoManager = CompleteTodo(state.TodoManager, a),
+                    };
                 case DeleteTodoAction a:
-                    state.TodoManager = DeleteTodo(state.TodoManager, a);
-                    break;
+                    return new AppState
+                    {
+                        TodoManager = DeleteTodo(state.TodoManager, a),
+                    };
             }
             return state;
         }

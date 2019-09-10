@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -11,18 +8,18 @@ namespace ReduxSharp.Tests
     {
         public class AppState { }
 
-        public static class AppReducer
+        public class AsyncAppReducer : IReducer<AppState>
         {
-            public static AppState Invoke(AppState state, IAction action)
+            public ValueTask<AppState> Invoke<TAction>(AppState state, TAction action)
             {
-                return state ?? new AppState();
+                return new ValueTask<AppState>(state ?? new AppState());
             }
         }
 
         [Fact]
         public void Constructor_initialize_new_instance()
         {
-            var builder = new StoreBuilder<AppState>(AppReducer.Invoke);
+            var builder = new StoreBuilder<AppState>(new AsyncAppReducer());
             Assert.NotNull(builder);
         }
 
@@ -31,14 +28,14 @@ namespace ReduxSharp.Tests
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                new StoreBuilder<AppState>(null);
+                _ = new StoreBuilder<AppState>(null as IReducer<AppState>);
             });
         }
 
         [Fact]
         public void Build_returns_new_store_instance()
         {
-            var builder = new StoreBuilder<AppState>(AppReducer.Invoke);
+            var builder = new StoreBuilder<AppState>(new AsyncAppReducer());
             var store = builder.Build();
             Assert.NotNull(store);
         }
@@ -47,7 +44,7 @@ namespace ReduxSharp.Tests
         public void UseMiddleware_add_class_type_middleware_to_store()
         {
             var options = new LoggerOptions();
-            var store = new StoreBuilder<AppState>(AppReducer.Invoke)
+            var store = new StoreBuilder<AppState>(new AsyncAppReducer())
                 .UseLogger(options)
                 .Build();
             Assert.Single(options.Buffer);
@@ -58,7 +55,7 @@ namespace ReduxSharp.Tests
         public void UseMiddleware_add_middleware_that_no_options()
         {
             var options = new LoggerOptions();
-            var store = new StoreBuilder<AppState>(AppReducer.Invoke)
+            var store = new StoreBuilder<AppState>(new AsyncAppReducer())
                 .UseDummy()
                 .UseLogger(options)
                 .Build();
