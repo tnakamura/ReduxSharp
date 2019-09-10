@@ -26,7 +26,7 @@ namespace ReduxSharp
 		/// <param name="reducer">
 		/// A reducing function that returns the next state tree.
 		/// </param>
-		/// <param name="initialState">
+		/// <param name="state">
 		/// The initial state.
 		/// </param>
 		/// <param name="middlewares">
@@ -36,17 +36,8 @@ namespace ReduxSharp
         {
             if (reducer == null) throw new ArgumentNullException(nameof(reducer));
 
+			State = state;
             dispatcher = new DispatchPipeline(this, reducer, middlewares);
-            if (state != default)
-            {
-                State = state;
-            }
-            else
-            {
-                Dispatch(new ReduxInitialAction())
-                    .GetAwaiter()
-                    .GetResult();
-            }
         }
 
         /// <summary>
