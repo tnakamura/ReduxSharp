@@ -48,6 +48,7 @@ namespace ReduxSharp
         /// <summary>
         /// Dispatches an action.
         /// </summary>
+		/// <typeparam name="TAction">A type of action.</typeparam>
         /// <param name="action">
         /// An object describing the change that makes sense for your application.
         /// </param>

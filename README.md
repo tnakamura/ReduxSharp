@@ -91,10 +91,10 @@ The `Store<TState>` is the class that bring actions and reducer together.
 The store has the following responsibilities:
 
 - Holds application state of type TState.
-- Allows state to be update via `Dispatch(IAction action)`.
+- Allows state to be update via `Dispatch<TAction>(TAction action)`.
 - Registers listeners via `Subscribe(IObserver observer)`.The `Store<TState>` class implements IObservable.
 
-The `StoreBuilder<TState>` take an initial state, of type TState, and a reducer.
+The `Store<TState>` take an initial state, of type TState, and a reducer.
 
 ```c#
 using System;
@@ -106,9 +106,7 @@ namespace ReduxSharpSample
     {
         static async Task Main(string[] args)
         {
-            IStore<AppState> store = new StoreBuilder<AppState>(new AppReducer())
-                .UseInitialState(new AppState())
-                .Build();
+            var store = new Store<AppState>(new AppReducer(), new AppState());
 
             Console.WriteLine(store.State.Count); // => 0
 
