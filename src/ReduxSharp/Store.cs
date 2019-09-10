@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -7,11 +6,11 @@ using ReduxSharp.Internal;
 
 namespace ReduxSharp
 {
-    /// <summary>
-    /// A store that holds the complete state tree of your application.
-    /// </summary>
-    /// <typeparam name="TState">A type of root state tree</typeparam>
-    public sealed class Store<TState> : IStore<TState>, IObserverLinkedList<TState>
+	/// <summary>
+	/// A store that holds the complete state tree of your application.
+	/// </summary>
+	/// <typeparam name="TState">A type of root state tree</typeparam>
+	public sealed class Store<TState> : IStore<TState>, IObserverLinkedList<TState>
     {
         readonly DispatchPipeline dispatcher;
 
@@ -21,14 +20,26 @@ namespace ReduxSharp
 
         ObserverNode<TState> last;
 
-        internal Store(IReducer<TState> reducer, TState initialState, params IMiddleware<TState>[] middlewares)
+		/// <summary>
+		/// Initializes a new instance of <see cref="Store{TState}"/> class.
+		/// </summary>
+		/// <param name="reducer">
+		/// A reducing function that returns the next state tree.
+		/// </param>
+		/// <param name="initialState">
+		/// The initial state.
+		/// </param>
+		/// <param name="middlewares">
+		/// Functions that conform to the Redux middleware API.
+		/// </param>
+		public Store(IReducer<TState> reducer, TState state, params IMiddleware<TState>[] middlewares)
         {
             if (reducer == null) throw new ArgumentNullException(nameof(reducer));
 
             dispatcher = new DispatchPipeline(this, reducer, middlewares);
-            if (initialState != default)
+            if (state != default)
             {
-                State = initialState;
+                State = state;
             }
             else
             {

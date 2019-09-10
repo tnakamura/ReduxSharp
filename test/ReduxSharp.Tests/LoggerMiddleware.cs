@@ -23,12 +23,4 @@ namespace ReduxSharp.Tests
     {
         public List<string> Buffer { get; set; } = new List<string>();
     }
-
-    public static class LoggerMiddlewareExtensions
-    {
-        public static IStoreBuilder<TState> UseLogger<TState>(this IStoreBuilder<TState> store, LoggerOptions options)
-        {
-            return store.UseMiddleware(new LoggerMiddleware<TState>(options));
-        }
-    }
 }

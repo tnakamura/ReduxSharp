@@ -13,12 +13,4 @@ namespace ReduxSharp.Tests
     public class DummyAction
     {
     }
-
-    public static class DummyMiddlewareExtensions
-    {
-        public static IStoreBuilder<TState> UseDummy<TState>(this IStoreBuilder<TState> store)
-        {
-            return store.UseMiddleware(new DummyMiddleware<TState>());
-        }
-    }
 }
