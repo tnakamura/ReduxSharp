@@ -65,29 +65,6 @@ namespace ReduxSharp.Tests
             Assert.Equal(1000, store.State.Count);
         }
 
-        [Fact]
-        public void DispatchHandleExceptionTest()
-        {
-            var store = new Store<AppState>(new AsyncAppReducer(), new AppState());
-
-            Exception actual = null;
-            var observer = new ActionObserver<AppState>()
-            {
-                Error = (error) =>
-                {
-                    actual = error;
-                }
-            };
-            store.Subscribe(observer);
-
-            store.Dispatch(
-                new RaiseExceptionAction(
-                    new NotSupportedException()));
-
-            Assert.NotNull(actual);
-            Assert.IsType<NotSupportedException>(actual);
-        }
-
         public class AsyncAppReducer : IReducer<AppState>
         {
             public AppState Invoke<TAction>(AppState state, in TAction action)
@@ -117,7 +94,7 @@ namespace ReduxSharp.Tests
             }
         }
 
-        public class AsyncLogMiddleware<TState> : IMiddleware<TState>
+        public class LoggingMiddleware<TState> : IMiddleware<TState>
         {
             public List<string> Logs { get; } = new List<string>();
 
@@ -164,17 +141,9 @@ namespace ReduxSharp.Tests
         }
 
         [Fact]
-        public void DispatchAsyncActionTest()
-        {
-            var store = new Store<AppState>(new AsyncAppReducer(), new AppState());
-            store.Dispatch(new IncrementAction());
-            Assert.Equal(1, store.State.Count);
-        }
-
-        [Fact]
         public void MiddlewareTest()
         {
-            var middleware = new AsyncLogMiddleware<AppState>();
+            var middleware = new LoggingMiddleware<AppState>();
             var store = new Store<AppState>(
                 new AsyncAppReducer(),
                 new AppState(),
