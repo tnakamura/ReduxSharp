@@ -45,18 +45,15 @@ namespace ReduxSharpSample
 {
     public class AppReducer : IReducer<AppState>
     {
-        public async ValueTask<AppState> Invoke<TAction>(AppState state, TAction action)
+        public AppState Invoke<TAction>(AppState state, in TAction action)
         {
             switch (action)
             {
                 case IncrementAction _:
-                    return await Task.Run(() =>
+                    return new AppState
                     {
-                        return new AppState
-                        {
-                            Count = state.Count + 1
-                        };
-                    });
+                        Count = state.Count + 1
+                    };
                 case DecrementAction _:
                     return new AppState
                     {
@@ -91,7 +88,7 @@ The `Store<TState>` is the class that bring actions and reducer together.
 The store has the following responsibilities:
 
 - Holds application state of type TState.
-- Allows state to be update via `Dispatch<TAction>(TAction action)`.
+- Allows state to be update via `Dispatch<TAction>(in TAction action)`.
 - Registers listeners via `Subscribe(IObserver observer)`.The `Store<TState>` class implements IObservable.
 
 The `Store<TState>` take an initial state, of type TState, and a reducer.
@@ -104,16 +101,16 @@ namespace ReduxSharpSample
 {
     class Program
     {
-        static async Task Main(string[] args)
+        static void Main(string[] args)
         {
             var store = new Store<AppState>(new AppReducer(), new AppState());
 
             Console.WriteLine(store.State.Count); // => 0
 
-            await store.Dispatch(new IncrementAction());
+            store.Dispatch(new IncrementAction());
             Console.WriteLine(store.State.Count); // => 1
 
-            await store.Dispatch(new DecrementAction());
+            store.Dispatch(new DecrementAction());
             Console.WriteLine(store.State.Count); // => 0
         }
     } 
