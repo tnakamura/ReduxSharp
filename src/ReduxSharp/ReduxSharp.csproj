@@ -29,8 +29,4 @@
     <DocumentationFile>bin\Release\netstandard2.0\ReduxSharp.xml</DocumentationFile>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.3" />
-  </ItemGroup>
-
 </Project>
