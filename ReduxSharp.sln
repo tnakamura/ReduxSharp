@@ -1,15 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26730.3
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29215.179
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9A93F44F-AF49-44A1-91BC-FE1B749347B9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{286AC2DC-C0C2-4647-91B1-8EDA41CB708B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReduxSharp", "src\ReduxSharp\ReduxSharp.csproj", "{9A677932-F4D0-4710-9466-E860EE1C072F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReduxSharp", "src\ReduxSharp\ReduxSharp.csproj", "{9A677932-F4D0-4710-9466-E860EE1C072F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReduxSharp.Tests", "test\ReduxSharp.Tests\ReduxSharp.Tests.csproj", "{CC63C199-1CCB-4B45-962E-2878A8268668}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReduxSharp.Tests", "test\ReduxSharp.Tests\ReduxSharp.Tests.csproj", "{CC63C199-1CCB-4B45-962E-2878A8268668}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{DFB60075-EA61-484B-91AB-8EBA7CAE71B1}"
 EndProject
@@ -18,6 +18,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RxCounter", "examples\RxCounter\RxCounter.csproj", "{454251DA-14E9-4179-B0AA-16CF01D5D773}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TodoList", "examples\TodoList\TodoList.csproj", "{2DB0EC1B-5BB4-4C52-886B-A2B50AF87C10}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmark", "examples\Benchmark\Benchmark.csproj", "{60BD1C06-6583-4308-899E-2D6DB5643221}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{2DB0EC1B-5BB4-4C52-886B-A2B50AF87C10}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2DB0EC1B-5BB4-4C52-886B-A2B50AF87C10}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2DB0EC1B-5BB4-4C52-886B-A2B50AF87C10}.Release|Any CPU.Build.0 = Release|Any CPU
+		{60BD1C06-6583-4308-899E-2D6DB5643221}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60BD1C06-6583-4308-899E-2D6DB5643221}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{60BD1C06-6583-4308-899E-2D6DB5643221}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60BD1C06-6583-4308-899E-2D6DB5643221}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -55,6 +61,7 @@ Global
 		{D12DBDCD-9F4A-447A-881A-9D33F758F7C2} = {DFB60075-EA61-484B-91AB-8EBA7CAE71B1}
 		{454251DA-14E9-4179-B0AA-16CF01D5D773} = {DFB60075-EA61-484B-91AB-8EBA7CAE71B1}
 		{2DB0EC1B-5BB4-4C52-886B-A2B50AF87C10} = {DFB60075-EA61-484B-91AB-8EBA7CAE71B1}
+		{60BD1C06-6583-4308-899E-2D6DB5643221} = {DFB60075-EA61-484B-91AB-8EBA7CAE71B1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {731F7BEE-0664-4AAC-899D-503866A27C69}

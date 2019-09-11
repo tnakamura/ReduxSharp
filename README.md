@@ -26,9 +26,9 @@ using ReduxSharp;
 
 namespace ReduxSharpSample
 {
-    public class IncrementAction {}
+    public struct IncrementAction {}
 
-    public class DecrementAction {}
+    public struct DecrementAction {}
 }
 ```
 
@@ -47,24 +47,24 @@ namespace ReduxSharpSample
     {
         public async ValueTask<AppState> Invoke<TAction>(AppState state, TAction action)
         {
-            if (action is IncrementAction)
+            switch (action)
             {
-                return await Task.Run(() =>
-                {
+                case IncrementAction _:
+                    return await Task.Run(() =>
+                    {
+                        return new AppState
+                        {
+                            Count = state.Count + 1
+                        };
+                    });
+                case DecrementAction _:
                     return new AppState
                     {
-                        Count = state.Count + 1
+                        Count = state.Count - 1
                     };
-                });
+                default:
+                    return state;
             }
-            if (action is DecrementAction)
-            {
-                return new AppState
-                {
-                    Count = state.Count - 1
-                };
-            }
-            return state;
         }
     }
 }
