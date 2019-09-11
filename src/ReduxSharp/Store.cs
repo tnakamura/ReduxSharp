@@ -55,8 +55,15 @@ namespace ReduxSharp
         /// <returns>A task that represents the asynchronous dispatch actions.</returns>
         public async ValueTask Dispatch<TAction>(TAction action)
         {
-            await dispatcher.Invoke(action)
-                .ConfigureAwait(false);
+            try
+            {
+                await dispatcher.Invoke(action)
+                    .ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                OnError(ex);
+            }
         }
 
         sealed class MiddlewareDispatcher : IDispatcher
@@ -99,18 +106,11 @@ namespace ReduxSharp
             {
                 using (await store.writeLock.LockAsync())
                 {
-                    try
-                    {
-                        var currentState = store.State;
-                        var nextState = await reducer.Invoke(currentState, action)
-                            .ConfigureAwait(false);
-                        store.State = nextState;
-                        store.OnNext(store.State);
-                    }
-                    catch (Exception ex)
-                    {
-                        store.OnError(ex);
-                    }
+                    var currentState = store.State;
+                    var nextState = await reducer.Invoke(currentState, action)
+                        .ConfigureAwait(false);
+                    store.State = nextState;
+                    store.OnNext(store.State);
                 }
             }
         }
