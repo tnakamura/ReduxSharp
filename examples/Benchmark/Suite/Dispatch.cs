@@ -23,7 +23,7 @@ namespace Benchmark.Suite
         }
 
         [Benchmark(Baseline = true)]
-        public object ReduxDotNet()
+        public Redux.IAction ReduxDotNet()
         {
             return reduxDotNetStore.Dispatch(new IncrementAction());
         }
