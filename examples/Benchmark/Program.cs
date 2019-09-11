@@ -18,7 +18,9 @@ namespace Benchmark
         public int Count { get; set; }
     }
 
-    public struct IncrementAction : Redux.IAction { }
+    public struct StructIncrementAction : Redux.IAction { }
+
+    public class ClassIncrementAction : Redux.IAction { }
 
     public class AppReducer : ReduxSharp.IReducer<AppState>
     {

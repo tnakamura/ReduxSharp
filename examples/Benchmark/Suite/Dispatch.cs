@@ -22,16 +22,28 @@ namespace Benchmark.Suite
                 new AppState());
         }
 
-        [Benchmark(Baseline = true)]
-        public Redux.IAction ReduxDotNet()
+        [Benchmark]
+        public Redux.IAction ReduxDotNet_struct()
         {
-            return reduxDotNetStore.Dispatch(new IncrementAction());
+            return reduxDotNetStore.Dispatch(new StructIncrementAction());
         }
 
         [Benchmark]
-        public void ReduxSharp()
+        public void ReduxSharp_struct()
         {
-            reduxSharpStore.Dispatch(new IncrementAction());
+            reduxSharpStore.Dispatch(new StructIncrementAction());
+        }
+
+        [Benchmark]
+        public Redux.IAction ReduxDotNet_class()
+        {
+            return reduxDotNetStore.Dispatch(new ClassIncrementAction());
+        }
+
+        [Benchmark]
+        public void ReduxSharp_class()
+        {
+            reduxSharpStore.Dispatch(new ClassIncrementAction());
         }
     }
 }

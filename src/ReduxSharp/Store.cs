@@ -52,17 +52,7 @@ namespace ReduxSharp
         /// An object describing the change that makes sense for your application.
         /// </param>
         /// <returns>A task that represents the asynchronous dispatch actions.</returns>
-        public void Dispatch<TAction>(in TAction action)
-        {
-            try
-            {
-                dispatcher.Invoke(action);
-            }
-            catch (Exception ex)
-            {
-                OnError(ex);
-            }
-        }
+        public void Dispatch<TAction>(in TAction action) => dispatcher.Invoke(action);
 
         sealed class MiddlewareDispatcher : IDispatcher
         {
@@ -82,10 +72,8 @@ namespace ReduxSharp
                 this.middleware = middleware;
             }
 
-            public void Invoke<TAction>(in TAction action)
-            {
+            public void Invoke<TAction>(in TAction action) =>
                 middleware.Invoke(store, next, action);
-            }
         }
 
         sealed class ActionDispatcher : IDispatcher
@@ -129,10 +117,8 @@ namespace ReduxSharp
                 innerDispatcher = next;
             }
 
-            public void Invoke<TAction>(in TAction action)
-            {
+            public void Invoke<TAction>(in TAction action) =>
                 innerDispatcher.Invoke(action);
-            }
         }
 
         /// <summary>
@@ -170,17 +156,6 @@ namespace ReduxSharp
             while (node != null)
             {
                 node.OnNext(value);
-                node = node.Next;
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void OnError(Exception error)
-        {
-            var node = root;
-            while (node != null)
-            {
-                node.OnError(error);
                 node = node.Next;
             }
         }
