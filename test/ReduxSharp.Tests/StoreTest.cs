@@ -45,10 +45,10 @@ namespace ReduxSharp.Tests
         }
 
         [Fact]
-        public async Task DispatchActionTest()
+        public void DispatchActionTest()
         {
             var store = new Store<AppState>(new AsyncAppReducer(), new AppState());
-            await store.Dispatch(new IncrementAction());
+            store.Dispatch(new IncrementAction());
             Assert.Equal(1, store.State.Count);
         }
 
@@ -57,16 +57,16 @@ namespace ReduxSharp.Tests
         {
             var store = new Store<AppState>(new AsyncAppReducer(), new AppState());
 
-            await Task.WhenAll(Enumerable.Range(0, 1000).Select(async _ =>
+            await Task.WhenAll(Enumerable.Range(0, 1000).Select(_ => Task.Run(() =>
             {
-                await store.Dispatch(new IncrementAction());
-            }));
+                store.Dispatch(new IncrementAction());
+            })));
 
             Assert.Equal(1000, store.State.Count);
         }
 
         [Fact]
-        public async Task DispatchHandleExceptionTest()
+        public void DispatchHandleExceptionTest()
         {
             var store = new Store<AppState>(new AsyncAppReducer(), new AppState());
 
@@ -80,7 +80,7 @@ namespace ReduxSharp.Tests
             };
             store.Subscribe(observer);
 
-            await store.Dispatch(
+            store.Dispatch(
                 new RaiseExceptionAction(
                     new NotSupportedException()));
 
@@ -90,7 +90,7 @@ namespace ReduxSharp.Tests
 
         public class AsyncAppReducer : IReducer<AppState>
         {
-            public async ValueTask<AppState> Invoke<TAction>(AppState state, TAction action)
+            public AppState Invoke<TAction>(AppState state, in TAction action)
             {
                 state = state ?? new AppState
                 {
@@ -100,21 +100,15 @@ namespace ReduxSharp.Tests
                 switch (action)
                 {
                     case IncrementAction _:
-                        return await Task.Run(() =>
+                        return new AppState
                         {
-                            return new AppState
-                            {
-                                Count = state.Count + 1,
-                            };
-                        });
+                            Count = state.Count + 1,
+                        };
                     case DecrementAction _:
-                        return await Task.Run(() =>
+                        return new AppState
                         {
-                            return new AppState
-                            {
-                                Count = state.Count - 1,
-                            };
-                        });
+                            Count = state.Count - 1,
+                        };
                     case RaiseExceptionAction e:
                         throw e.Exception;
                     default:
@@ -127,14 +121,14 @@ namespace ReduxSharp.Tests
         {
             public List<string> Logs { get; } = new List<string>();
 
-            public async ValueTask Invoke<TAction>(
+            public void Invoke<TAction>(
                 IStore<TState> store,
                 IDispatcher next,
-                TAction action)
+                in TAction action)
             {
                 Logs.Add($"Executing {action.GetType().Name}");
 
-                await next.Invoke(action).ConfigureAwait(false);
+                next.Invoke(action);
 
                 Logs.Add($"Executed {action.GetType().Name}");
             }
@@ -144,17 +138,17 @@ namespace ReduxSharp.Tests
         {
             public List<History> Histories { get; } = new List<History>();
 
-            public async ValueTask Invoke<TAction>(
+            public void Invoke<TAction>(
                 IStore<TState> store,
                 IDispatcher next,
-                TAction action)
+                in TAction action)
             {
                 var history = new History();
                 history.Action = JsonConvert.SerializeObject(action);
                 history.BeforeState = JsonConvert.SerializeObject(store.State);
                 Histories.Add(history);
 
-                await next.Invoke(action);
+                next.Invoke(action);
 
                 history.AfterState = JsonConvert.SerializeObject(store.State);
             }
@@ -170,15 +164,15 @@ namespace ReduxSharp.Tests
         }
 
         [Fact]
-        public async Task DispatchAsyncActionTest()
+        public void DispatchAsyncActionTest()
         {
             var store = new Store<AppState>(new AsyncAppReducer(), new AppState());
-            await store.Dispatch(new IncrementAction());
+            store.Dispatch(new IncrementAction());
             Assert.Equal(1, store.State.Count);
         }
 
         [Fact]
-        public async Task MiddlewareTest()
+        public void MiddlewareTest()
         {
             var middleware = new AsyncLogMiddleware<AppState>();
             var store = new Store<AppState>(
@@ -186,7 +180,7 @@ namespace ReduxSharp.Tests
                 new AppState(),
                 middleware);
 
-            await store.Dispatch(new IncrementAction());
+            store.Dispatch(new IncrementAction());
 
             Assert.Equal(1, store.State.Count);
             Assert.Equal(2, middleware.Logs.Count);
@@ -195,7 +189,7 @@ namespace ReduxSharp.Tests
         }
 
         [Fact]
-        public async Task TimeTravelTest()
+        public void TimeTravelTest()
         {
             var middleware = new TimeTravelMiddleweare<AppState>();
             var store = new Store<AppState>(
@@ -203,10 +197,10 @@ namespace ReduxSharp.Tests
                 new AppState(),
                 middleware);
 
-            await store.Dispatch(new IncrementAction());
-            await store.Dispatch(new IncrementAction());
-            await store.Dispatch(new DecrementAction());
-            await store.Dispatch(new IncrementAction());
+            store.Dispatch(new IncrementAction());
+            store.Dispatch(new IncrementAction());
+            store.Dispatch(new DecrementAction());
+            store.Dispatch(new IncrementAction());
 
             Assert.Equal(2, store.State.Count);
             Assert.Equal(4, middleware.Histories.Count);
@@ -226,25 +220,6 @@ namespace ReduxSharp.Tests
             Assert.NotNull(JsonConvert.DeserializeObject<IncrementAction>(middleware.Histories[3].Action));
             Assert.Equal(1, JsonConvert.DeserializeObject<AppState>(middleware.Histories[3].BeforeState).Count);
             Assert.Equal(2, JsonConvert.DeserializeObject<AppState>(middleware.Histories[3].AfterState).Count);
-        }
-
-        [Fact]
-        public async Task ThunkTest()
-        {
-            var middleware = new ThunkMiddleware<AppState>();
-            var store = new Store<AppState>(
-                new AsyncAppReducer(),
-                new AppState(),
-                middleware);
-
-            await store.Dispatch(new Func<IDispatcher, ValueTask>(async d =>
-            {
-                await d.Invoke(new IncrementAction());
-                await d.Invoke(new IncrementAction());
-                await d.Invoke(new IncrementAction());
-            }));
-
-            Assert.Equal(3, store.State.Count);
         }
     }
 }

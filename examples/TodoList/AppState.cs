@@ -63,18 +63,15 @@ namespace TodoList
 
     public class TodoManagerReducer : IReducer<AppState>
     {
-        public async ValueTask<AppState> Invoke<TAction>(AppState state, TAction action)
+        public AppState Invoke<TAction>(AppState state, in TAction action)
         {
             switch (action)
             {
                 case AddTodoAction a:
-                    return await Task.Run(() =>
+                    return new AppState
                     {
-                        return new AppState
-                        {
-                            TodoManager = AddTodo(state.TodoManager, a)
-                        };
-                    });
+                        TodoManager = AddTodo(state.TodoManager, a)
+                    };
                 case CompleteTodoAction a:
                     return new AppState
                     {

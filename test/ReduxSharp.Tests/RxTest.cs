@@ -26,19 +26,16 @@ namespace ReduxSharp.Tests
 
         public class AppReducer : IReducer<AppState>
         {
-            public async ValueTask<AppState> Invoke<TAction>(AppState state, TAction action)
+            public AppState Invoke<TAction>(AppState state, in TAction action)
             {
                 state = state ?? new AppState();
                 switch (action)
                 {
                     case IncrementAction _:
-                        return await Task.Run(() =>
+                        return new AppState
                         {
-                            return new AppState
-                            {
-                                Count = state.Count + 1,
-                            };
-                        });
+                            Count = state.Count + 1,
+                        };
                     case RaiseExceptionAction e:
                         throw e.Exception;
                     default:
@@ -48,7 +45,7 @@ namespace ReduxSharp.Tests
         }
 
         [Fact]
-        public async Task OnErrorTest()
+        public void OnErrorTest()
         {
             var store = new Store<AppState>(new AppReducer(), new AppState());
 
@@ -70,9 +67,9 @@ namespace ReduxSharp.Tests
                     completed = true;
                 });
 
-            await store.Dispatch(
+            store.Dispatch(
                 new IncrementAction());
-            await store.Dispatch(
+            store.Dispatch(
                 new RaiseExceptionAction(
                     new NotSupportedException()));
 

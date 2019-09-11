@@ -29,9 +29,9 @@ namespace Benchmark.Suite
         }
 
         [Benchmark]
-        public ValueTask ReduxSharp()
+        public void ReduxSharp()
         {
-            return reduxSharpStore.Dispatch(new IncrementAction());
+            reduxSharpStore.Dispatch(new IncrementAction());
         }
     }
 }

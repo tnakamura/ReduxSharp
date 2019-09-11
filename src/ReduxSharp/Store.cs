@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 using ReduxSharp.Internal;
 
 namespace ReduxSharp
@@ -14,7 +13,7 @@ namespace ReduxSharp
     {
         readonly DispatchPipeline dispatcher;
 
-        readonly AsyncLock writeLock = new AsyncLock();
+        readonly object dispatchLock = new object();
 
         ObserverNode<TState> root;
 
@@ -53,12 +52,11 @@ namespace ReduxSharp
         /// An object describing the change that makes sense for your application.
         /// </param>
         /// <returns>A task that represents the asynchronous dispatch actions.</returns>
-        public async ValueTask Dispatch<TAction>(TAction action)
+        public void Dispatch<TAction>(in TAction action)
         {
             try
             {
-                await dispatcher.Invoke(action)
-                    .ConfigureAwait(false);
+                dispatcher.Invoke(action);
             }
             catch (Exception ex)
             {
@@ -84,9 +82,9 @@ namespace ReduxSharp
                 this.middleware = middleware;
             }
 
-            public async ValueTask Invoke<TAction>(TAction action)
+            public void Invoke<TAction>(in TAction action)
             {
-                await middleware.Invoke(store, next, action).ConfigureAwait(false);
+                middleware.Invoke(store, next, action);
             }
         }
 
@@ -102,13 +100,12 @@ namespace ReduxSharp
                 this.reducer = reducer;
             }
 
-            public async ValueTask Invoke<TAction>(TAction action)
+            public void Invoke<TAction>(in TAction action)
             {
-                using (await store.writeLock.LockAsync())
+                lock (store.dispatchLock)
                 {
                     var currentState = store.State;
-                    var nextState = await reducer.Invoke(currentState, action)
-                        .ConfigureAwait(false);
+                    var nextState = reducer.Invoke(currentState, action);
                     store.State = nextState;
                     store.OnNext(store.State);
                 }
@@ -132,9 +129,9 @@ namespace ReduxSharp
                 innerDispatcher = next;
             }
 
-            public async ValueTask Invoke<TAction>(TAction action)
+            public void Invoke<TAction>(in TAction action)
             {
-                await innerDispatcher.Invoke(action).ConfigureAwait(false);
+                innerDispatcher.Invoke(action);
             }
         }
 

@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-
-namespace ReduxSharp
+﻿namespace ReduxSharp
 {
     /// <summary>
     /// Represents a dispatcher that accepts an action.
@@ -13,6 +11,6 @@ namespace ReduxSharp
         /// <param name="action">
         /// An object describing the change that makes sense for your application.
         /// </param>
-        ValueTask Invoke<TAction>(TAction action);
+        void Invoke<TAction>(in TAction action);
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 
 namespace ReduxSharp
 {
@@ -21,6 +20,6 @@ namespace ReduxSharp
         /// An object describing the change that makes sense for your application.
         /// </param>
         /// <returns>A task that represents the asynchronous dispatch actions.</returns>
-        ValueTask Dispatch<TAction>(TAction action);
+        void Dispatch<TAction>(in TAction action);
     }
 }

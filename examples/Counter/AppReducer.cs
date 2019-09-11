@@ -5,33 +5,27 @@ namespace Counter
 {
     public class AppReducer : IReducer<AppState>
     {
-        public async ValueTask<AppState> Invoke<TAction>(AppState state, TAction action)
+        public AppState Invoke<TAction>(AppState state, in TAction action)
         {
             if (action is CountUpAction)
             {
-                return await Task.Run(() =>
+                return new AppState
                 {
-                    return new AppState
+                    Counter = new CounterState
                     {
-                        Counter = new CounterState
-                        {
-                            Count = state.Counter.Count + 1,
-                        }
-                    };
-                });
+                        Count = state.Counter.Count + 1,
+                    }
+                };
             }
             else if (action is CountDownAction)
             {
-                return await Task.Run(() =>
+                return new AppState
                 {
-                    return new AppState
+                    Counter = new CounterState
                     {
-                        Counter = new CounterState
-                        {
-                            Count = state.Counter.Count - 1,
-                        }
-                    };
-                });
+                        Count = state.Counter.Count - 1,
+                    }
+                };
             }
             else
             {

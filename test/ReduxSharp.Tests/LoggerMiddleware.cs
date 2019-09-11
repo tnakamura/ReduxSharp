@@ -12,12 +12,12 @@ namespace ReduxSharp.Tests
             this.options = options;
         }
 
-		public async ValueTask Invoke<TAction>(IStore<TState> store, IDispatcher next, TAction action)
-		{
-			options.Buffer.Add(action.GetType().FullName);
-			await next.Invoke(action);
-		}
-	}
+        public void Invoke<TAction>(IStore<TState> store, IDispatcher next, in TAction action)
+        {
+            options.Buffer.Add(action.GetType().FullName);
+            next.Invoke(action);
+        }
+    }
 
     public class LoggerOptions
     {

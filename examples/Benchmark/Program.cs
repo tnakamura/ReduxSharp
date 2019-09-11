@@ -18,38 +18,12 @@ namespace Benchmark
         public int Count { get; set; }
     }
 
-    public struct IncrementAction : Redux.IAction
-    {
-    }
+    public struct IncrementAction : Redux.IAction { }
 
     public class AppReducer : ReduxSharp.IReducer<AppState>
     {
-        public static AppState Reduce(AppState state, object action)
-        {
-            switch (action)
-            {
-                case IncrementAction _:
-                    return new AppState
-                    {
-                        Count = state.Count + 1,
-                    };
-                default:
-                    return state;
-            }
-        }
+        public static AppState Reduce(AppState state, Redux.IAction action) => state;
 
-        public ValueTask<AppState> Invoke<TAction>(AppState state, TAction action)
-        {
-            switch (action)
-            {
-                case IncrementAction _:
-                    return new ValueTask<AppState>(new AppState
-                    {
-                        Count = state.Count + 1,
-                    });
-                default:
-                    return new ValueTask<AppState>(state);
-            }
-        }
+        public AppState Invoke<TAction>(AppState state, in TAction action) => state;
     }
 }

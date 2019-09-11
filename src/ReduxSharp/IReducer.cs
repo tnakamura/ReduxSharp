@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-
-namespace ReduxSharp
+﻿namespace ReduxSharp
 {
     /// <summary>
     /// Defines a reducer that accepts an accumulation
@@ -16,6 +14,6 @@ namespace ReduxSharp
         /// <param name="state">A state object</param>
         /// <param name="action">An action object</param>
         /// <returns>A new state object</returns>
-        ValueTask<TState> Invoke<TAction>(TState state, TAction action);
+        TState Invoke<TAction>(TState state, in TAction action);
     }
 }
