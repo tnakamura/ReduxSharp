@@ -11,7 +11,7 @@ namespace ReduxSharp
     /// <typeparam name="TState">A type of root state tree</typeparam>
     public sealed class Store<TState> : IStore<TState>, IObserverLinkedList<TState>
     {
-        readonly DispatchPipeline dispatcher;
+        readonly IDispatcher dispatcher;
 
         readonly object dispatchLock = new object();
 
@@ -36,8 +36,19 @@ namespace ReduxSharp
             if (reducer == null) throw new ArgumentNullException(nameof(reducer));
 
             State = state;
-            dispatcher = new DispatchPipeline(this, reducer, middlewares);
+			dispatcher = ApplyMiddlewares(reducer, middlewares);
         }
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		IDispatcher ApplyMiddlewares(IReducer<TState> reducer, IMiddleware<TState>[] middlewares)
+		{
+			IDispatcher next = new ActionDispatcher(this, reducer);
+			foreach (var middleware in middlewares.Reverse())
+			{
+				next = new MiddlewareDispatcher(middleware, this, next);
+			}
+			return next;
+		}
 
         /// <summary>
         /// Returns the current state tree of your application.
@@ -98,28 +109,7 @@ namespace ReduxSharp
                     store.OnNext(store.State);
                 }
             }
-        }
-
-        sealed class DispatchPipeline : IDispatcher
-        {
-            readonly IDispatcher innerDispatcher;
-
-            public DispatchPipeline(
-                Store<TState> store,
-                IReducer<TState> reducer,
-                IMiddleware<TState>[] middlewares)
-            {
-                IDispatcher next = new ActionDispatcher(store, reducer);
-                foreach (var middleware in middlewares.Reverse())
-                {
-                    next = new MiddlewareDispatcher(middleware, store, next);
-                }
-                innerDispatcher = next;
-            }
-
-            public void Invoke<TAction>(in TAction action) =>
-                innerDispatcher.Invoke(action);
-        }
+        } 
 
         /// <summary>
         /// Notifies the provider that an observer is to receive notifications.
