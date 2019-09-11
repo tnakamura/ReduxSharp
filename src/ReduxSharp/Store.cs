@@ -6,11 +6,11 @@ using ReduxSharp.Internal;
 
 namespace ReduxSharp
 {
-	/// <summary>
-	/// A store that holds the complete state tree of your application.
-	/// </summary>
-	/// <typeparam name="TState">A type of root state tree</typeparam>
-	public sealed class Store<TState> : IStore<TState>, IObserverLinkedList<TState>
+    /// <summary>
+    /// A store that holds the complete state tree of your application.
+    /// </summary>
+    /// <typeparam name="TState">A type of root state tree</typeparam>
+    public sealed class Store<TState> : IStore<TState>, IObserverLinkedList<TState>
     {
         readonly DispatchPipeline dispatcher;
 
@@ -20,23 +20,23 @@ namespace ReduxSharp
 
         ObserverNode<TState> last;
 
-		/// <summary>
-		/// Initializes a new instance of <see cref="Store{TState}"/> class.
-		/// </summary>
-		/// <param name="reducer">
-		/// A reducing function that returns the next state tree.
-		/// </param>
-		/// <param name="state">
-		/// The initial state.
-		/// </param>
-		/// <param name="middlewares">
-		/// Functions that conform to the Redux middleware API.
-		/// </param>
-		public Store(IReducer<TState> reducer, TState state, params IMiddleware<TState>[] middlewares)
+        /// <summary>
+        /// Initializes a new instance of <see cref="Store{TState}"/> class.
+        /// </summary>
+        /// <param name="reducer">
+        /// A reducing function that returns the next state tree.
+        /// </param>
+        /// <param name="state">
+        /// The initial state.
+        /// </param>
+        /// <param name="middlewares">
+        /// Objects that conform to the Redux middleware API.
+        /// </param>
+        public Store(IReducer<TState> reducer, TState state, params IMiddleware<TState>[] middlewares)
         {
             if (reducer == null) throw new ArgumentNullException(nameof(reducer));
 
-			State = state;
+            State = state;
             dispatcher = new DispatchPipeline(this, reducer, middlewares);
         }
 
@@ -67,7 +67,10 @@ namespace ReduxSharp
 
             readonly IStore<TState> store;
 
-            public MiddlewareDispatcher(IMiddleware<TState> middleware, IStore<TState> store, IDispatcher next)
+            public MiddlewareDispatcher(
+                IMiddleware<TState> middleware,
+                IStore<TState> store,
+                IDispatcher next)
             {
                 this.store = store;
                 this.next = next;

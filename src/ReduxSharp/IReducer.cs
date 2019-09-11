@@ -1,9 +1,10 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace ReduxSharp
 {
     /// <summary>
+    /// Defines a reducer that accepts an accumulation
+    /// and a value and returns a new accumulation.
     /// </summary>
     /// <typeparam name="TState">A type of state tree</typeparam>
     public interface IReducer<TState>

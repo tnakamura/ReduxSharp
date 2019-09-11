@@ -1,15 +1,14 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace ReduxSharp
 {
     /// <summary>
-    /// An object that accepts an action.
+    /// Represents a dispatcher that accepts an action.
     /// </summary>
     public interface IDispatcher
     {
         /// <summary>
-        /// Invoke an action.
+        /// Accepts an action.
         /// </summary>
         /// <param name="action">
         /// An object describing the change that makes sense for your application.
