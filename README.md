@@ -26,9 +26,9 @@ using ReduxSharp;
 
 namespace ReduxSharpSample
 {
-    public struct IncrementAction {}
+    public readonly struct IncrementAction {}
 
-    public struct DecrementAction {}
+    public readonly struct DecrementAction {}
 }
 ```
 
