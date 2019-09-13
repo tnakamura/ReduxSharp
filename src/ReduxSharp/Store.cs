@@ -9,11 +9,13 @@ namespace ReduxSharp
     /// A store that holds the complete state tree of your application.
     /// </summary>
     /// <typeparam name="TState">A type of root state tree</typeparam>
-    public sealed class Store<TState> : IStore<TState>, IObserverLinkedList<TState>
+    public sealed class Store<TState> : IStore<TState>, IDispatcher, IObserverLinkedList<TState>
     {
+        readonly object dispatchLock = new object();
+
         readonly IDispatcher dispatcher;
 
-        readonly object dispatchLock = new object();
+        readonly IReducer<TState> reducer;
 
         ObserverNode<TState> root;
 
@@ -33,22 +35,21 @@ namespace ReduxSharp
         /// </param>
         public Store(IReducer<TState> reducer, TState state, params IMiddleware<TState>[] middlewares)
         {
-            if (reducer == null) throw new ArgumentNullException(nameof(reducer));
-
+            this.reducer = reducer ?? throw new ArgumentNullException(nameof(reducer));
             State = state;
-			dispatcher = ApplyMiddlewares(reducer, middlewares);
+            dispatcher = ApplyMiddlewares(middlewares);
         }
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		IDispatcher ApplyMiddlewares(IReducer<TState> reducer, IMiddleware<TState>[] middlewares)
-		{
-			IDispatcher next = new ActionDispatcher(this, reducer);
-			foreach (var middleware in middlewares.Reverse())
-			{
-				next = new MiddlewareDispatcher(middleware, this, next);
-			}
-			return next;
-		}
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        IDispatcher ApplyMiddlewares(IMiddleware<TState>[] middlewares)
+        {
+            IDispatcher next = this;
+            foreach (var middleware in middlewares.Reverse())
+            {
+                next = new MiddlewareDispatcher(middleware, this, next);
+            }
+            return next;
+        }
 
         /// <summary>
         /// Returns the current state tree of your application.
@@ -64,6 +65,15 @@ namespace ReduxSharp
         /// </param>
         /// <returns>A task that represents the asynchronous dispatch actions.</returns>
         public void Dispatch<TAction>(in TAction action) => dispatcher.Invoke(action);
+
+        void IDispatcher.Invoke<TAction>(in TAction action)
+        {
+            lock (dispatchLock)
+            {
+                State = reducer.Invoke(State, action);
+            }
+            OnNext(State);
+        }
 
         sealed class MiddlewareDispatcher : IDispatcher
         {
@@ -84,32 +94,8 @@ namespace ReduxSharp
             }
 
             public void Invoke<TAction>(in TAction action) =>
-                middleware.Invoke(store, next, action);
+                    middleware.Invoke(store, next, action);
         }
-
-        sealed class ActionDispatcher : IDispatcher
-        {
-            readonly IReducer<TState> reducer;
-
-            readonly Store<TState> store;
-
-            public ActionDispatcher(Store<TState> store, IReducer<TState> reducer)
-            {
-                this.store = store;
-                this.reducer = reducer;
-            }
-
-            public void Invoke<TAction>(in TAction action)
-            {
-                lock (store.dispatchLock)
-                {
-                    var currentState = store.State;
-                    var nextState = reducer.Invoke(currentState, action);
-                    store.State = nextState;
-                    store.OnNext(store.State);
-                }
-            }
-        } 
 
         /// <summary>
         /// Notifies the provider that an observer is to receive notifications.
