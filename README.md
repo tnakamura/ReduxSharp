@@ -2,7 +2,7 @@
 
 Unidirectional Data Flow in C# - Inspired by Redux
 
-[![NuGet](https://img.shields.io/nuget/v/ReduxSharp.svg?maxAge=2592000)](https://www.nuget.org/packages/ReduxSharp/)
+[![NuGet](https://img.shields.io/nuget/v/ReduxSharp.svg?maxAge=3600)](https://www.nuget.org/packages/ReduxSharp/)
 
 ## Installation
 
