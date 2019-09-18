@@ -19,7 +19,6 @@ namespace ReduxSharp
         /// <param name="action">
         /// An object describing the change that makes sense for your application.
         /// </param>
-        /// <returns>A task that represents the asynchronous dispatch actions.</returns>
-        void Dispatch<TAction>(in TAction action);
+        void Dispatch<TAction>(TAction action);
     }
 }

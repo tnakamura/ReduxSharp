@@ -64,9 +64,9 @@ namespace ReduxSharp
         /// An object describing the change that makes sense for your application.
         /// </param>
         /// <returns>A task that represents the asynchronous dispatch actions.</returns>
-        public void Dispatch<TAction>(in TAction action) => dispatcher.Invoke(action);
+        public void Dispatch<TAction>(TAction action) => dispatcher.Invoke(action);
 
-        void IDispatcher.Invoke<TAction>(in TAction action)
+        void IDispatcher.Invoke<TAction>(TAction action)
         {
             lock (dispatchLock)
             {
@@ -93,7 +93,7 @@ namespace ReduxSharp
                 this.middleware = middleware;
             }
 
-            public void Invoke<TAction>(in TAction action) =>
+            public void Invoke<TAction>(TAction action) =>
                     middleware.Invoke(store, next, action);
         }
 

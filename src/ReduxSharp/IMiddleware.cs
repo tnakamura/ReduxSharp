@@ -13,6 +13,6 @@
         /// <param name="store">A store</param>
         /// <param name="next">A dispatch function</param>
         /// <param name="action">An action object</param>
-        void Invoke<TAction>(IStore<TState> store, IDispatcher next, in TAction action);
+        void Invoke<TAction>(IStore<TState> store, IDispatcher next, TAction action);
     }
 }

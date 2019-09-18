@@ -14,6 +14,6 @@
         /// <param name="state">A state object</param>
         /// <param name="action">An action object</param>
         /// <returns>A new state object</returns>
-        TState Invoke<TAction>(TState state, in TAction action);
+        TState Invoke<TAction>(TState state, TAction action);
     }
 }

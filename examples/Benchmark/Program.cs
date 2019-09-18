@@ -25,7 +25,7 @@ namespace Benchmark
     {
         public static AppState Reduce(AppState state, Redux.IAction action) => state;
 
-        public AppState Invoke<TAction>(AppState state, in TAction action) => state;
+        public AppState Invoke<TAction>(AppState state, TAction action) => state;
     }
 
     public sealed class EmptyMiddleware<TState> : ReduxSharp.IMiddleware<TState>
@@ -33,7 +33,7 @@ namespace Benchmark
         public void Invoke<TAction>(
             ReduxSharp.IStore<TState> store,
             ReduxSharp.IDispatcher next,
-            in TAction action)
+            TAction action)
         {
             next.Invoke(action);
         }

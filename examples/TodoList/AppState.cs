@@ -63,7 +63,7 @@ namespace TodoList
 
     public class TodoManagerReducer : IReducer<AppState>
     {
-        public AppState Invoke<TAction>(AppState state, in TAction action)
+        public AppState Invoke<TAction>(AppState state, TAction action)
         {
             switch (action)
             {

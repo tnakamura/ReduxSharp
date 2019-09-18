@@ -5,7 +5,7 @@ namespace Counter
 {
     public class AppReducer : IReducer<AppState>
     {
-        public AppState Invoke<TAction>(AppState state, in TAction action)
+        public AppState Invoke<TAction>(AppState state, TAction action)
         {
             if (action is CountUpAction)
             {
