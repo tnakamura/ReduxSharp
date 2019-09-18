@@ -26,9 +26,9 @@ using ReduxSharp;
 
 namespace ReduxSharpSample
 {
-    public readonly struct IncrementAction {}
+    public struct IncrementAction {}
 
-    public readonly struct DecrementAction {}
+    public struct DecrementAction {}
 }
 ```
 
@@ -45,23 +45,23 @@ namespace ReduxSharpSample
 {
     public class AppReducer : IReducer<AppState>
     {
-        public AppState Invoke<TAction>(AppState state, in TAction action)
+        public AppState Invoke<TAction>(AppState state, TAction action)
         {
-            switch (action)
+            if (action is IncrementAction)
             {
-                case IncrementAction _:
-                    return new AppState
-                    {
-                        Count = state.Count + 1
-                    };
-                case DecrementAction _:
-                    return new AppState
-                    {
-                        Count = state.Count - 1
-                    };
-                default:
-                    return state;
+                return new AppState
+                {
+                    Count = state.Count + 1
+                };
             }
+            if (action is DecrementAction)
+            {
+                return new AppState
+                {
+                    Count = state.Count - 1
+                };
+            }
+            return state;
         }
     }
 }
@@ -88,7 +88,7 @@ The `Store<TState>` is the class that bring actions and reducer together.
 The store has the following responsibilities:
 
 - Holds application state of type TState.
-- Allows state to be update via `Dispatch<TAction>(in TAction action)`.
+- Allows state to be update via `Dispatch<TAction>(TAction action)`.
 - Registers listeners via `Subscribe(IObserver observer)`.The `Store<TState>` class implements IObservable.
 
 The `Store<TState>` take an initial state, of type TState, and a reducer.
