@@ -122,6 +122,7 @@ namespace ReduxSharp
                 next.Previous = last;
                 last = next;
             }
+            next.OnNext(State);
             return next;
         }
 

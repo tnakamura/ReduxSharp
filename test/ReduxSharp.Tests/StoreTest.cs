@@ -28,44 +28,7 @@ namespace ReduxSharp.Tests
             }
         }
 
-        [Fact]
-        public void ConstructorTest()
-        {
-            var store = new Store<AppState>(new AsyncAppReducer(), default);
-            Assert.NotNull(store);
-        }
-
-        [Fact]
-        public void ConstructorNullReducerTest()
-        {
-            Assert.Throws<ArgumentNullException>(() =>
-            {
-                new Store<AppState>(null as IReducer<AppState>, default);
-            });
-        }
-
-        [Fact]
-        public void DispatchActionTest()
-        {
-            var store = new Store<AppState>(new AsyncAppReducer(), new AppState());
-            store.Dispatch(new IncrementAction());
-            Assert.Equal(1, store.State.Count);
-        }
-
-        [Fact]
-        public async Task DispatchThreadSafeTest()
-        {
-            var store = new Store<AppState>(new AsyncAppReducer(), new AppState());
-
-            await Task.WhenAll(Enumerable.Range(0, 1000).Select(_ => Task.Run(() =>
-            {
-                store.Dispatch(new IncrementAction());
-            })));
-
-            Assert.Equal(1000, store.State.Count);
-        }
-
-        public class AsyncAppReducer : IReducer<AppState>
+        public class AppReducer : IReducer<AppState>
         {
             public AppState Invoke<TAction>(AppState state, TAction action)
             {
@@ -92,6 +55,66 @@ namespace ReduxSharp.Tests
                         return state;
                 }
             }
+        }
+
+        class DelegateObserver<T> : IObserver<T>
+        {
+            readonly Action<T> onNext;
+
+            public DelegateObserver(Action<T> onNext)
+            {
+                this.onNext = onNext;
+            }
+
+            public void OnCompleted()
+            {
+            }
+
+            public void OnError(Exception error)
+            {
+            }
+
+            public void OnNext(T value)
+            {
+                onNext(value);
+            }
+        }
+
+        [Fact]
+        public void ConstructorTest()
+        {
+            var store = new Store<AppState>(new AppReducer(), default);
+            Assert.NotNull(store);
+        }
+
+        [Fact]
+        public void ConstructorNullReducerTest()
+        {
+            Assert.Throws<ArgumentNullException>(() =>
+            {
+                new Store<AppState>(null as IReducer<AppState>, default);
+            });
+        }
+
+        [Fact]
+        public void DispatchActionTest()
+        {
+            var store = new Store<AppState>(new AppReducer(), new AppState());
+            store.Dispatch(new IncrementAction());
+            Assert.Equal(1, store.State.Count);
+        }
+
+        [Fact]
+        public async Task DispatchThreadSafeTest()
+        {
+            var store = new Store<AppState>(new AppReducer(), new AppState());
+
+            await Task.WhenAll(Enumerable.Range(0, 1000).Select(_ => Task.Run(() =>
+            {
+                store.Dispatch(new IncrementAction());
+            })));
+
+            Assert.Equal(1000, store.State.Count);
         }
 
         public class LoggingMiddleware<TState> : IMiddleware<TState>
@@ -145,7 +168,7 @@ namespace ReduxSharp.Tests
         {
             var middleware = new LoggingMiddleware<AppState>();
             var store = new Store<AppState>(
-                new AsyncAppReducer(),
+                new AppReducer(),
                 new AppState(),
                 middleware);
 
@@ -158,11 +181,48 @@ namespace ReduxSharp.Tests
         }
 
         [Fact]
+        public void OnNext_call_when_subscribe()
+        {
+            var store = new Store<AppState>(
+                new AppReducer(),
+                new AppState());
+
+            AppState actualState = null;
+            store.Subscribe(new DelegateObserver<AppState>(x =>
+            {
+                actualState = x;
+            }));
+
+            Assert.NotNull(actualState);
+            Assert.Same(store.State, actualState);
+        }
+
+        [Fact]
+        public void OnNext_call_when_dispatch_action()
+        {
+            var store = new Store<AppState>(
+                new AppReducer(),
+                new AppState());
+
+            var actualStates = new List<AppState>();
+            store.Subscribe(new DelegateObserver<AppState>(x =>
+            {
+                actualStates.Add(x);
+            }));
+
+            store.Dispatch(new IncrementAction());
+
+            Assert.Equal(2, actualStates.Count);
+            Assert.Equal(0, actualStates[0].Count);
+            Assert.Equal(1, actualStates[1].Count);
+        }
+
+        [Fact]
         public void TimeTravelTest()
         {
             var middleware = new TimeTravelMiddleweare<AppState>();
             var store = new Store<AppState>(
-                new AsyncAppReducer(),
+                new AppReducer(),
                 new AppState(),
                 middleware);
 
