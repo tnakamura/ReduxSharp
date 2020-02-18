@@ -4,6 +4,7 @@ Unidirectional Data Flow in C# - Inspired by Redux
 
 [![NuGet](https://img.shields.io/nuget/v/ReduxSharp.svg?maxAge=3600)](https://www.nuget.org/packages/ReduxSharp/)
 
+
 ## Installation
 
 First, [install Nuget](http://docs.nuget.org/docs/start-here/installing-nuget).
@@ -16,19 +17,30 @@ PM> Install-Package ReduxSharp
 
 ## Quick-start
 
+### State
+
+```cs
+namespace HelloWorld
+{
+    public class AppState
+    {
+        public AppState(int count) => Count = count;
+
+        public int Count { get; }
+    }
+}
+```
+
 ### Actions
 
 Actions are payloads of information that send data from your application to your store.
 
 ```cs
-using System;
-using ReduxSharp;
-
-namespace ReduxSharpSample
+namespace HelloWorld
 {
-    public struct IncrementAction {}
+    public readonly struct Increment {}
 
-    public struct DecrementAction {}
+    public readonly struct Decrement {}
 }
 ```
 
@@ -41,43 +53,22 @@ It describes how an action transforms the state into the next state.
 using System;
 using ReduxSharp;
 
-namespace ReduxSharpSample
+namespace HelloWorld
 {
     public class AppReducer : IReducer<AppState>
     {
         public AppState Invoke<TAction>(AppState state, TAction action)
         {
-            if (action is IncrementAction)
+            switch (action)
             {
-                return new AppState
-                {
-                    Count = state.Count + 1
-                };
+                case Increment _:
+                    return new AppState(state.Count + 1);
+                case Decrement _:
+                    return new AppState(state.Count - 1);
+                default:
+                    return state;
             }
-            if (action is DecrementAction)
-            {
-                return new AppState
-                {
-                    Count = state.Count - 1
-                };
-            }
-            return state;
         }
-    }
-}
-```
-
-### State
-
-```cs
-using System;
-using ReduxSharp;
-
-namespace ReduxSharpSample
-{
-    public class AppState
-    {
-        public int Count { get; set; } = 0;
     }
 }
 ```
@@ -97,22 +88,32 @@ The `Store<TState>` take an initial state, of type TState, and a reducer.
 using System;
 using ReduxSharp;
 
-namespace ReduxSharpSample
+namespace HelloWorld
 {
-    class Program
+    class Program : IObserver<AppState>
     {
         static void Main(string[] args)
         {
-            var store = new Store<AppState>(new AppReducer(), new AppState());
+            var store = new Store<AppState>(
+                new AppReducer(),
+                new AppState(0));
 
-            Console.WriteLine(store.State.Count); // => 0
-
-            store.Dispatch(new IncrementAction());
-            Console.WriteLine(store.State.Count); // => 1
-
-            store.Dispatch(new DecrementAction());
-            Console.WriteLine(store.State.Count); // => 0
+            var p = new Program();
+            using (store.Subscribe(p))
+            {
+                store.Dispatch(new Increment()); // => 1
+                store.Dispatch(new Increment()); // => 2
+                store.Dispatch(new Decrement()); // => 1
+                store.Dispatch(new Increment()); // => 2
+            }
         }
+
+        public void OnNext(AppState value) =>
+            Console.WriteLine(value.Count);
+
+        public void OnCompleted() { }
+
+        public void OnError(Exception error) { }
     } 
 }
 ```
