@@ -17,9 +17,9 @@ namespace ReduxSharp
 
         readonly IReducer<TState> reducer;
 
-        ObserverNode<TState> root;
+        ObserverNode<TState>? root = null;
 
-        ObserverNode<TState> last;
+        ObserverNode<TState>? last = null;
 
         /// <summary>
         /// Initializes a new instance of <see cref="Store{TState}"/> class.
@@ -118,7 +118,7 @@ namespace ReduxSharp
             }
             else
             {
-                last.Next = next;
+                last!.Next = next;
                 next.Previous = last;
                 last = next;
             }

@@ -7,11 +7,11 @@ namespace ReduxSharp.Internal
     {
         readonly IObserver<T> observer;
 
-        IObserverLinkedList<T> list;
+        IObserverLinkedList<T>? list;
 
-        internal ObserverNode<T> Previous { get; set; }
+        internal ObserverNode<T>? Previous { get; set; }
 
-        internal ObserverNode<T> Next { get; set; }
+        internal ObserverNode<T>? Next { get; set; }
 
         public ObserverNode(IObserverLinkedList<T> list, IObserver<T> observer)
         {
