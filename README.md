@@ -5,6 +5,17 @@ Unidirectional Data Flow in C# - Inspired by Redux
 [![NuGet](https://img.shields.io/nuget/v/ReduxSharp.svg?maxAge=3600)](https://www.nuget.org/packages/ReduxSharp/)
 
 
+## About ReduxSharp
+
+There is a library in JavaScript called Redux. 
+
+If you have ever developed a Single Page Application with React, you may have used it.
+
+For more information on Redux, please read the official documentation.
+
+ReduxSharp is a port of Redux to C#.
+
+
 ## Installation
 
 First, [install Nuget](http://docs.nuget.org/docs/start-here/installing-nuget).
@@ -18,6 +29,8 @@ PM> Install-Package ReduxSharp
 ## Quick-start
 
 ### State
+
+Define a class that represents a state of the app.
 
 ```cs
 namespace HelloWorld
@@ -33,6 +46,8 @@ namespace HelloWorld
 
 ### Actions
 
+Define actions.
+
 Actions are payloads of information that send data from your application to your store.
 
 ```cs
@@ -45,6 +60,8 @@ namespace HelloWorld
 ```
 
 ### Reducers
+
+Define a Reducer.
 
 A reducer need to implement the interface `IReducer<TState>`.
 It describes how an action transforms the state into the next state.
@@ -74,6 +91,8 @@ namespace HelloWorld
 ```
 
 ### Store
+
+Create an instance of `Store<TState>`.
 
 The `Store<TState>` is the class that bring actions and reducer together.
 The store has the following responsibilities:
@@ -117,6 +136,31 @@ namespace HelloWorld
     } 
 }
 ```
+
+
+### Middlewares
+
+ReduxSharp supports middlewares.
+
+You can insert processing before and after `IReducer<TState>.Invoke<TAction>(TState, TAction)` is called.
+
+```cs
+using Newtonsoft.Json;
+using ReduxSharp;
+
+public class ConsoleLoggingMiddleware<TState> : IMiddleware<TState>
+{
+    public void Invoke<TAction>(IStore<TState> store, IDispatcher next, TAction action)
+    {
+        Console.WriteLine(JsonConvert.SerializeObject(store.State));
+
+        next.Invoke(action);
+
+        Console.WriteLine(JsonConvert.SerializeObject(store.State));
+    }
+}
+```
+
 
 ## Examples
 
