@@ -5,12 +5,10 @@ Unidirectional Data Flow in C# - Inspired by Redux
 [![NuGet](https://img.shields.io/nuget/v/ReduxSharp.svg?maxAge=3600)](https://www.nuget.org/packages/ReduxSharp/)
 
 
-## About ReduxSharp
+## About
 
 There is a library in JavaScript called Redux. 
-
 If you have ever developed a Single Page Application with React, you may have used it.
-
 For more information on Redux, please read the official documentation.
 
 ReduxSharp is a port of Redux to C#.
@@ -47,7 +45,6 @@ namespace HelloWorld
 ### Actions
 
 Define actions.
-
 Actions are payloads of information that send data from your application to your store.
 
 ```cs
@@ -61,8 +58,7 @@ namespace HelloWorld
 
 ### Reducers
 
-Define a Reducer.
-
+Define a reducer.
 A reducer need to implement the interface `IReducer<TState>`.
 It describes how an action transforms the state into the next state.
 
@@ -93,7 +89,6 @@ namespace HelloWorld
 ### Store
 
 Create an instance of `Store<TState>`.
-
 The `Store<TState>` is the class that bring actions and reducer together.
 The store has the following responsibilities:
 
@@ -141,7 +136,6 @@ namespace HelloWorld
 ### Middlewares
 
 ReduxSharp supports middlewares.
-
 You can insert processing before and after `IReducer<TState>.Invoke<TAction>(TState, TAction)` is called.
 
 ```cs
