@@ -12,7 +12,7 @@ namespace ReduxSharp
     public delegate Task AsyncActionCreator<TState>(IStore<TState> store);
 
     /// <summary>
-    /// 
+    /// Extension methods for a <see cref="IStore{TState}"/>.
     /// </summary>
     public static class StoreExtensions
     {
