@@ -10,9 +10,9 @@
     <PackageLicenseUrl></PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/tnakamura/ReduxSharp</PackageProjectUrl>
     <Description>Unidirectional Data Flow in C# - Inspired by Redux</Description>
-    <RepositoryUrl>https://github.com/tnakamura/ReduxSharp.git</RepositoryUrl>
+    <RepositoryUrl>https://github.com/tnakamura/ReduxSharp</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageTags>flux redux</PackageTags>
+    <PackageTags>flux;redux</PackageTags>
     <PackageReleaseNotes></PackageReleaseNotes>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <AssemblyVersion>0.5.1.0</AssemblyVersion>
@@ -20,6 +20,10 @@
     <LangVersion>8.0</LangVersion>
     <Nullable>enable</Nullable>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Title>ReduxSharp</Title>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <IncludeSymbols>True</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -29,5 +33,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DocumentationFile>bin\Release\netstandard2.0\ReduxSharp.xml</DocumentationFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
 </Project>
