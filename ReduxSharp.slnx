@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/examples/">
+    <Project Path="examples/Benchmark/Benchmark.csproj" />
+    <Project Path="examples/Counter/Counter.csproj" />
+    <Project Path="examples/HelloWorld/HelloWorld.csproj" />
+    <Project Path="examples/RxCounter/RxCounter.csproj" />
+    <Project Path="examples/TodoList/TodoList.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/ReduxSharp/ReduxSharp.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/ReduxSharp.Tests/ReduxSharp.Tests.csproj" />
+  </Folder>
+</Solution>
