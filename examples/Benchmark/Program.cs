@@ -7,6 +7,11 @@ namespace Benchmark
     {
         static void Main(string[] args)
         {
+            if (args.Length == 1 && args[0] == "--verify")
+            {
+                Prototype.Verification.Run();
+                return;
+            }
             BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
         }
     }

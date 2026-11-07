@@ -1,10 +1,7 @@
-﻿using BenchmarkDotNet.Configs;
+using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Environments;
-using BenchmarkDotNet.Exporters;
-using BenchmarkDotNet.Exporters.Csv;
 using BenchmarkDotNet.Jobs;
-
 
 namespace Benchmark
 {
@@ -12,15 +9,8 @@ namespace Benchmark
     {
         public BenchmarkConfig()
         {
-            // run quickly:)
-            var baseConfig = Job.ShortRun.WithIterationCount(1).WithWarmupCount(1);
-
-            //Add(baseConfig.With(ClrRuntime.Net48).With(Jit.RyuJit).With(Platform.X64));
-            Add(baseConfig.With(CoreRuntime.Core31).With(Jit.RyuJit).With(Platform.X64));
-
-            //Add(MarkdownExporter.GitHub);
-            //Add(CsvExporter.Default);
-            Add(MemoryDiagnoser.Default);
+            AddJob(Job.Default.WithPlatform(Platform.Arm64));
+            AddDiagnoser(MemoryDiagnoser.Default);
         }
     }
 }
