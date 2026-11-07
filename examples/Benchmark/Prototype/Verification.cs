@@ -1,8 +1,8 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Benchmark.Examples;
 using ReduxSharp;
 
 namespace Benchmark.Prototype
@@ -61,25 +61,27 @@ namespace Benchmark.Prototype
                 next();
                 log.Add("after");
             });
-            var builder = new StoreBuilder<int>(0).Use(twice).Use(inner);
-            var store = builder.Run(new Reducer());
+            IStoreBuilder<int> builder = new StoreBuilder<int>(0);
+            var store = builder.Use(twice).UseLoggingMiddleware(log.Add).Use(inner).Build(new Reducer());
             using (store.Subscribe(new Observer(n => log.Add(n.ToString()))))
             {
-                var add = store.For<Add>();
-                Require(ReferenceEquals(add, store.For<Add>()), "Entry was rebuilt.");
-                add(new Add(2));
-                Require(log.SequenceEqual(new[] { "0", "outer", "inner", "2", "after", "inner", "4", "after", "end" }),
+                store.Dispatch(new Add(2));
+                Require(log.SequenceEqual(new[] {
+                    "0", "outer", "Dispatching Add", "inner", "2", "after",
+                    "Dispatching Add", "inner", "4", "after", "end"
+                }),
                     "Middleware or notification order changed.");
             }
-            store.For<Subtract>()(new Subtract(1));
+            store.Dispatch(new Subtract(1));
             Require(store.State == 2 && twice.Builds == 2 && inner.Builds == 2, "Action types did not share state.");
             Require(!log.Contains("3"), "Disposed observer received a notification.");
 
-            var isolated = builder.Use(new Stage((_, _) => { })).Run(new Reducer());
+            var isolated = builder.Use(new Stage((_, _) => { })).Build(new Reducer());
             isolated.Dispatch(new Add(1));
             Require(isolated.State == 0 && store.State == 2, "Short circuit or store isolation failed.");
             store.Dispatch(new Add(1));
-            Require(store.State == 4, "Builder edits affected an existing store.");
+            Require(store.State == 4 && twice.Builds == 3 && inner.Builds == 3,
+                "Builder edits affected an existing store or a cached pipeline was rebuilt.");
 
             bool nested = false;
             var nestedStore = new StoreBuilder<int>(0).Use(new Stage((s, next) =>
@@ -92,7 +94,7 @@ namespace Benchmark.Prototype
                     Require(s.State == -1, "Nested dispatch did not complete synchronously.");
                 }
                 next();
-            })).Run(new Reducer());
+            })).Build(new Reducer());
             log.Clear();
             nestedStore.Dispatch(new Add(3));
             Require(nestedStore.State == 2 && log.SequenceEqual(new[] { "enter", "enter" }), "Reentry failed.");
@@ -110,16 +112,9 @@ namespace Benchmark.Prototype
             Require(seen.SequenceEqual(new[] { 2, 3 }), "Failed dispatch changed state or notified.");
 
             var pass = new Stage((_, next) => next());
-            var concurrent = new StoreBuilder<int>(0).Use(pass).Run(new Reducer());
-            var entries = new ConcurrentBag<Action<Add>>();
-            Parallel.For(0, 1000, _ =>
-            {
-                var entry = concurrent.For<Add>();
-                entries.Add(entry);
-                entry(new Add(1));
-            });
-            Require(entries.All(e => ReferenceEquals(e, concurrent.For<Add>())) &&
-                pass.Builds == 1 && concurrent.State == 1000, "Concurrent build or dispatch failed.");
+            var concurrent = new StoreBuilder<int>(0).Use(pass).Build(new Reducer());
+            Parallel.For(0, 1000, _ => concurrent.Dispatch(new Add(1)));
+            Require(pass.Builds == 1 && concurrent.State == 1000, "Concurrent build or dispatch failed.");
             Console.WriteLine("Typed middleware behavior checks passed.");
         }
     }

@@ -18,8 +18,7 @@ namespace Benchmark.Suite
     {
         ReduxSharp.Store<AppState> sharp;
         Redux.Store<AppState> redux;
-        Action<StructIncrementAction> typedStruct;
-        Action<ClassIncrementAction> typedClass;
+        TypedStore<AppState> typed;
         readonly ClassIncrementAction cached = new();
 
         [Params(0, 1, 3, 8)]
@@ -39,9 +38,7 @@ namespace Benchmark.Suite
             }
             sharp = new ReduxSharp.Store<AppState>(new AppReducer(), new AppState(), middlewares);
             redux = new Redux.Store<AppState>(AppReducer.Reduce, new AppState(), delegates);
-            var store = builder.Run(new AppReducer());
-            typedStruct = store.For<StructIncrementAction>();
-            typedClass = store.For<ClassIncrementAction>();
+            typed = builder.Build(new AppReducer());
         }
 
         [Benchmark(Baseline = true), BenchmarkCategory("Struct")]
@@ -49,20 +46,20 @@ namespace Benchmark.Suite
         [Benchmark, BenchmarkCategory("Struct")]
         public void ReduxSharpStruct() => sharp.Dispatch(new StructIncrementAction());
         [Benchmark, BenchmarkCategory("Struct")]
-        public void TypedStruct() => typedStruct(new StructIncrementAction());
+        public void TypedStruct() => typed.Dispatch(new StructIncrementAction());
 
         [Benchmark(Baseline = true), BenchmarkCategory("Class")]
         public Redux.IAction ReduxNetClass() => redux.Dispatch(new ClassIncrementAction());
         [Benchmark, BenchmarkCategory("Class")]
         public void ReduxSharpClass() => sharp.Dispatch(new ClassIncrementAction());
         [Benchmark, BenchmarkCategory("Class")]
-        public void TypedClass() => typedClass(new ClassIncrementAction());
+        public void TypedClass() => typed.Dispatch(new ClassIncrementAction());
 
         [Benchmark(Baseline = true), BenchmarkCategory("CachedClass")]
         public Redux.IAction ReduxNetCached() => redux.Dispatch(cached);
         [Benchmark, BenchmarkCategory("CachedClass")]
         public void ReduxSharpCached() => sharp.Dispatch(cached);
         [Benchmark, BenchmarkCategory("CachedClass")]
-        public void TypedCached() => typedClass(cached);
+        public void TypedCached() => typed.Dispatch(cached);
     }
 }

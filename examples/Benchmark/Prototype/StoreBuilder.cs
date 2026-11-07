@@ -5,33 +5,39 @@ using ReduxSharp;
 
 namespace Benchmark.Prototype
 {
-    internal interface IMiddlewareFactory<TState>
+    public interface IMiddlewareFactory<TState>
     {
         Action<TAction> Build<TAction>(IStore<TState> store, Action<TAction> next);
     }
 
-    internal sealed class StoreBuilder<TState>
+    public interface IStoreBuilder<TState>
+    {
+        IStoreBuilder<TState> Use(IMiddlewareFactory<TState> factory);
+        TypedStore<TState> Build(IReducer<TState> reducer);
+    }
+
+    public sealed class StoreBuilder<TState> : IStoreBuilder<TState>
     {
         readonly TState initialState;
         readonly List<IMiddlewareFactory<TState>> factories = new();
 
         public StoreBuilder(TState initialState) => this.initialState = initialState;
 
-        public StoreBuilder<TState> Use(IMiddlewareFactory<TState> factory)
+        public IStoreBuilder<TState> Use(IMiddlewareFactory<TState> factory)
         {
             ArgumentNullException.ThrowIfNull(factory);
             factories.Add(factory);
             return this;
         }
 
-        public TypedStore<TState> Run(IReducer<TState> reducer)
+        public TypedStore<TState> Build(IReducer<TState> reducer)
         {
             ArgumentNullException.ThrowIfNull(reducer);
             return new TypedStore<TState>(initialState, reducer, factories.ToArray());
         }
     }
 
-    internal sealed class TypedStore<TState> : IStore<TState>
+    public sealed class TypedStore<TState> : IStore<TState>
     {
         readonly IReducer<TState> reducer;
         readonly IMiddlewareFactory<TState>[] factories;
@@ -51,11 +57,13 @@ namespace Benchmark.Prototype
 
         public TState State { get; private set; }
 
-        public Action<TAction> For<TAction>()
+        public void Dispatch<TAction>(TAction action)
         {
             var type = typeof(TAction);
-            if (entries.TryGetValue(type, out var entry)) return (Action<TAction>)entry;
-            return BuildEntry<TAction>();
+            var dispatch = entries.TryGetValue(type, out var entry)
+                ? (Action<TAction>)entry
+                : BuildEntry<TAction>();
+            dispatch(action);
         }
 
         Action<TAction> BuildEntry<TAction>()
@@ -93,8 +101,6 @@ namespace Benchmark.Prototype
                 }
             }
         }
-
-        public void Dispatch<TAction>(TAction action) => For<TAction>()(action);
 
         public IDisposable Subscribe(IObserver<TState> observer)
         {
