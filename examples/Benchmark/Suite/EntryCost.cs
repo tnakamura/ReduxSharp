@@ -1,4 +1,4 @@
-using Benchmark.Prototype;
+using ReduxSharp;
 using BenchmarkDotNet.Attributes;
 
 namespace Benchmark.Suite
@@ -7,7 +7,7 @@ namespace Benchmark.Suite
     public class EntryCost
     {
         const int BatchSize = 1024;
-        readonly TypedStore<AppState>[] fresh = new TypedStore<AppState>[BatchSize];
+        readonly Store<AppState>[] fresh = new Store<AppState>[BatchSize];
         StoreBuilder<AppState> builder;
         readonly AppReducer reducer = new();
 

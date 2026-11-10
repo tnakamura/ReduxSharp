@@ -12,7 +12,7 @@ namespace TodoList
 
         static App()
         {
-            Store = new Store<AppState>(new TodoManagerReducer(), new AppState());
+            Store = new StoreBuilder<AppState>(new AppState()).Build(new TodoManagerReducer());
         }
     }
 }

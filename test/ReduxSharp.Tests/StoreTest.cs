@@ -81,25 +81,25 @@ namespace ReduxSharp.Tests
         }
 
         [Fact]
-        public void ConstructorTest()
+        public void BuildTest()
         {
-            var store = new Store<AppState>(new AppReducer(), default);
+            var store = new StoreBuilder<AppState>(default).Build(new AppReducer());
             Assert.NotNull(store);
         }
 
         [Fact]
-        public void ConstructorNullReducerTest()
+        public void BuildNullReducerTest()
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                new Store<AppState>(null as IReducer<AppState>, default);
+                new StoreBuilder<AppState>(default).Build(null);
             });
         }
 
         [Fact]
         public void DispatchActionTest()
         {
-            var store = new Store<AppState>(new AppReducer(), new AppState());
+            var store = new StoreBuilder<AppState>(new AppState()).Build(new AppReducer());
             store.Dispatch(new IncrementAction());
             Assert.Equal(1, store.State.Count);
         }
@@ -107,7 +107,7 @@ namespace ReduxSharp.Tests
         [Fact]
         public async Task DispatchThreadSafeTest()
         {
-            var store = new Store<AppState>(new AppReducer(), new AppState());
+            var store = new StoreBuilder<AppState>(new AppState()).Build(new AppReducer());
 
             await Task.WhenAll(Enumerable.Range(0, 1000).Select(_ => Task.Run(() =>
             {
@@ -117,41 +117,35 @@ namespace ReduxSharp.Tests
             Assert.Equal(1000, store.State.Count);
         }
 
-        public class LoggingMiddleware<TState> : IMiddleware<TState>
+        public class LoggingMiddleware<TState> : IMiddlewareFactory<TState>
         {
             public List<string> Logs { get; } = new List<string>();
 
-            public void Invoke<TAction>(
-                IStore<TState> store,
-                IDispatcher next,
-                TAction action)
+            public Action<TAction> Build<TAction>(IStore<TState> store, Action<TAction> next) => action =>
             {
                 Logs.Add($"Executing {action.GetType().Name}");
 
-                next.Invoke(action);
+                next(action);
 
                 Logs.Add($"Executed {action.GetType().Name}");
-            }
+            };
         }
 
-        public class TimeTravelMiddleweare<TState> : IMiddleware<TState>
+        public class TimeTravelMiddleweare<TState> : IMiddlewareFactory<TState>
         {
             public List<History> Histories { get; } = new List<History>();
 
-            public void Invoke<TAction>(
-                IStore<TState> store,
-                IDispatcher next,
-                TAction action)
+            public Action<TAction> Build<TAction>(IStore<TState> store, Action<TAction> next) => action =>
             {
                 var history = new History();
                 history.Action = JsonConvert.SerializeObject(action);
                 history.BeforeState = JsonConvert.SerializeObject(store.State);
                 Histories.Add(history);
 
-                next.Invoke(action);
+                next(action);
 
                 history.AfterState = JsonConvert.SerializeObject(store.State);
-            }
+            };
 
             public class History
             {
@@ -167,10 +161,7 @@ namespace ReduxSharp.Tests
         public void MiddlewareTest()
         {
             var middleware = new LoggingMiddleware<AppState>();
-            var store = new Store<AppState>(
-                new AppReducer(),
-                new AppState(),
-                middleware);
+            var store = new StoreBuilder<AppState>(new AppState()).Use(middleware).Build(new AppReducer());
 
             store.Dispatch(new IncrementAction());
 
@@ -183,9 +174,7 @@ namespace ReduxSharp.Tests
         [Fact]
         public void OnNext_call_when_subscribe()
         {
-            var store = new Store<AppState>(
-                new AppReducer(),
-                new AppState());
+            var store = new StoreBuilder<AppState>(new AppState()).Build(new AppReducer());
 
             AppState actualState = null;
             store.Subscribe(new DelegateObserver<AppState>(x =>
@@ -200,9 +189,7 @@ namespace ReduxSharp.Tests
         [Fact]
         public void OnNext_call_when_dispatch_action()
         {
-            var store = new Store<AppState>(
-                new AppReducer(),
-                new AppState());
+            var store = new StoreBuilder<AppState>(new AppState()).Build(new AppReducer());
 
             var actualStates = new List<AppState>();
             store.Subscribe(new DelegateObserver<AppState>(x =>
@@ -221,10 +208,7 @@ namespace ReduxSharp.Tests
         public void TimeTravelTest()
         {
             var middleware = new TimeTravelMiddleweare<AppState>();
-            var store = new Store<AppState>(
-                new AppReducer(),
-                new AppState(),
-                middleware);
+            var store = new StoreBuilder<AppState>(new AppState()).Use(middleware).Build(new AppReducer());
 
             store.Dispatch(new IncrementAction());
             store.Dispatch(new IncrementAction());

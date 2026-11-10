@@ -12,9 +12,7 @@ namespace Benchmark.Suite
         [GlobalSetup]
         public void Setup()
         {
-            reduxSharpStore = new ReduxSharp.Store<AppState>(
-                new AppReducer(),
-                new AppState());
+            reduxSharpStore = new ReduxSharp.StoreBuilder<AppState>(new AppState()).Build(new AppReducer());
 
             reduxDotNetStore = new Redux.Store<AppState>(
                 AppReducer.Reduce,

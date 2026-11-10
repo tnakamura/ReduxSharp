@@ -1,5 +1,4 @@
 using System;
-using Benchmark.Prototype;
 using ReduxSharp;
 
 namespace Benchmark.Examples

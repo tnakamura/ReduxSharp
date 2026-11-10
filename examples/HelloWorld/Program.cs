@@ -7,9 +7,7 @@
     {
         static void Main(string[] args)
         {
-            var store = new Store<AppState>(
-                new AppReducer(),
-                new AppState(0));
+            var store = new StoreBuilder<AppState>(new AppState(0)).Build(new AppReducer());
 
             var p = new Program();
             using (store.Subscribe(p))

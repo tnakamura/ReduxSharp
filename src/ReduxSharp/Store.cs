@@ -1,5 +1,5 @@
-﻿using System;
-using System.Linq;
+using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using ReduxSharp.Internal;
 
@@ -9,92 +9,71 @@ namespace ReduxSharp
     /// A store that holds the complete state tree of your application.
     /// </summary>
     /// <typeparam name="TState">A type of root state tree</typeparam>
-    public sealed class Store<TState> : IStore<TState>, IDispatcher, IObserverLinkedList<TState>
+    public sealed class Store<TState> : IStore<TState>, IObserverLinkedList<TState>
     {
-        readonly object dispatchLock = new object();
-
-        readonly IDispatcher dispatcher;
-
         readonly IReducer<TState> reducer;
+        readonly IMiddlewareFactory<TState>[] factories;
+        readonly object stateLock = new object();
+        readonly object buildLock = new object();
+        readonly HashSet<Type> building = new HashSet<Type>();
+        // Published dictionaries are immutable. A cache hit needs no build lock.
+        volatile Dictionary<Type, Delegate> entries = new Dictionary<Type, Delegate>();
+        ObserverNode<TState>? root;
+        ObserverNode<TState>? last;
 
-        ObserverNode<TState>? root = null;
-
-        ObserverNode<TState>? last = null;
-
-        /// <summary>
-        /// Initializes a new instance of <see cref="Store{TState}"/> class.
-        /// </summary>
-        /// <param name="reducer">
-        /// A reducing function that returns the next state tree.
-        /// </param>
-        /// <param name="state">
-        /// The initial state.
-        /// </param>
-        /// <param name="middlewares">
-        /// Objects that conform to the Redux middleware API.
-        /// </param>
-        public Store(IReducer<TState> reducer, TState state, params IMiddleware<TState>[] middlewares)
+        internal Store(TState state, IReducer<TState> reducer, IMiddlewareFactory<TState>[] factories)
         {
-            this.reducer = reducer ?? throw new ArgumentNullException(nameof(reducer));
             State = state;
-            dispatcher = ApplyMiddlewares(middlewares);
+            this.reducer = reducer;
+            this.factories = factories;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        IDispatcher ApplyMiddlewares(IMiddleware<TState>[] middlewares)
-        {
-            IDispatcher next = this;
-            foreach (var middleware in middlewares.Reverse())
-            {
-                next = new MiddlewareDispatcher(middleware, this, next);
-            }
-            return next;
-        }
-
-        /// <summary>
-        /// Returns the current state tree of your application.
-        /// </summary>
+        /// <inheritdoc/>
         public TState State { get; private set; }
 
-        /// <summary>
-        /// Dispatches an action.
-        /// </summary>
-		/// <typeparam name="TAction">A type of action.</typeparam>
-        /// <param name="action">
-        /// An object describing the change that makes sense for your application.
-        /// </param>
-        /// <returns>A task that represents the asynchronous dispatch actions.</returns>
-        public void Dispatch<TAction>(TAction action) => dispatcher.Invoke(action);
-
-        void IDispatcher.Invoke<TAction>(TAction action)
+        /// <inheritdoc/>
+        public void Dispatch<TAction>(TAction action)
         {
-            lock (dispatchLock)
-            {
-                State = reducer.Invoke(State, action);
-            }
-            OnNext(State);
+            var type = typeof(TAction);
+            var dispatch = entries.TryGetValue(type, out var entry)
+                ? (Action<TAction>)entry
+                : BuildEntry<TAction>();
+            dispatch(action);
         }
 
-        sealed class MiddlewareDispatcher : IDispatcher
+        Action<TAction> BuildEntry<TAction>()
         {
-            readonly IMiddleware<TState> middleware;
-
-            readonly IDispatcher next;
-
-            readonly IStore<TState> store;
-
-            public MiddlewareDispatcher(
-                IMiddleware<TState> middleware,
-                IStore<TState> store,
-                IDispatcher next)
+            var type = typeof(TAction);
+            lock (buildLock)
             {
-                this.store = store;
-                this.next = next;
-                this.middleware = middleware;
+                if (entries.TryGetValue(type, out var entry)) return (Action<TAction>)entry;
+                if (!building.Add(type)) throw new InvalidOperationException("Recursive pipeline construction.");
+                try
+                {
+                    Func<TState, TAction, TState> reduce = reducer.Invoke<TAction>;
+                    Action<TAction> next = action =>
+                    {
+                        TState state;
+                        lock (stateLock)
+                        {
+                            state = reduce(State, action);
+                            State = state;
+                        }
+                        OnNext(state);
+                    };
+                    for (var i = factories.Length - 1; i >= 0; i--)
+                    {
+                        next = factories[i].Build(this, next)
+                            ?? throw new InvalidOperationException("Middleware returned a null dispatcher.");
+                    }
+                    entries = new Dictionary<Type, Delegate>(entries) { [type] = next };
+                    return next;
+                }
+                finally
+                {
+                    building.Remove(type);
+                }
             }
-
-            public void Invoke<TAction>(TAction action) =>
-                    middleware.Invoke(store, next, action);
         }
 
         /// <summary>

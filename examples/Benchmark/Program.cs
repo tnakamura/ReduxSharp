@@ -1,5 +1,4 @@
-﻿using System;
-using BenchmarkDotNet.Running;
+﻿using BenchmarkDotNet.Running;
 
 namespace Benchmark
 {
@@ -7,11 +6,6 @@ namespace Benchmark
     {
         static void Main(string[] args)
         {
-            if (args.Length == 1 && args[0] == "--verify")
-            {
-                Prototype.Verification.Run();
-                return;
-            }
             BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
         }
     }
@@ -31,22 +25,5 @@ namespace Benchmark
         public static AppState Reduce(AppState state, Redux.IAction action) => state;
 
         public AppState Invoke<TAction>(AppState state, TAction action) => state;
-    }
-
-    public sealed class EmptyMiddleware<TState> : ReduxSharp.IMiddleware<TState>
-    {
-        public void Invoke<TAction>(
-            ReduxSharp.IStore<TState> store,
-            ReduxSharp.IDispatcher next,
-            TAction action)
-        {
-            next.Invoke(action);
-        }
-
-        public static Func<Redux.Dispatcher, Redux.Dispatcher> ApplyMiddleware(
-            Redux.IStore<TState> store)
-        {
-            return next => action => next(action);
-        }
     }
 }

@@ -1,16 +1,16 @@
-# Typed middleware prototype
+# ReduxSharp middleware benchmarks
 
 A StoreBuilder registers middleware with Use. Build snapshots the factories and
 creates the store. Dispatch builds a typed pipeline on the first call for an
 action type and reuses it on subsequent calls.
 
 ```csharp
+using Benchmark;
 using Benchmark.Examples;
-using Benchmark.Prototype;
+using ReduxSharp;
 
 var store = new StoreBuilder<AppState>(new AppState())
     .UseLoggingMiddleware()
-    .Use(new PassThrough())
     .Build(new AppReducer());
 
 store.Dispatch(new StructIncrementAction());
@@ -18,7 +18,7 @@ store.Dispatch(new ClassIncrementAction());
 ```
 
 Extension methods can accept and return `IStoreBuilder<TState>` and register a
-factory through its `Use` method. `Build` returns the concrete typed store.
+factory through its `Use` method. `Build` returns the concrete `Store<TState>`.
 The [logging extension](Examples/LoggingMiddlewareExtensions.cs) writes action
 names to the console by default, or accepts a callback such as `log.Add`.
 
@@ -38,13 +38,13 @@ Run from the repository root on Arm64 with the .NET 10 SDK. The benchmark projec
 uses BenchmarkDotNet 0.15.8 and Redux.NET 2.0.0.
 
 ```sh
-dotnet run -c Release --project examples/Benchmark -- --verify
+DOTNET_ROLL_FORWARD=Major dotnet test -c Release test/ReduxSharp.Tests
 dotnet run -c Release --project examples/Benchmark -- --filter '*Middleware*' '*EntryCost*' --artifacts artifacts/typed-middleware
 ```
 
 The main matrix measures dispatch through each library's normal entry point.
-The prototype calls store.Dispatch(action), including the cache lookup. Each pass-through factory returns a wrapper
-that calls next. All three stores use the existing no-op benchmark reducer with
+ReduxSharp calls store.Dispatch(action), including the cache lookup. Each pass-through factory returns a wrapper
+that calls next. Both stores use the existing no-op benchmark reducer with
 no subscribers. The fresh-class cases include construction of the action, and
 the cached-class cases reuse one instance. Constructors and middleware
 registration run outside the timed methods.
@@ -58,7 +58,43 @@ bytes allocated per operation. Repeat comparisons with overlapping error
 intervals or means within 5% in an independent invocation. Treat an ordering
 that changes between runs as inconclusive.
 
-## Store-managed dispatch on 2026-11-08
+## Library results on 2026-11-10
+
+On macOS 26.5.1 Arm64 (.NET 10.0.5, SDK 10.0.201), ReduxSharp had a lower
+mean than Redux.NET 2.0.0 across all 12 steady-state comparisons. The reduction
+in time per dispatch ranged from 16% to 40%. The prototype column comes from
+the November 8 store-managed experiment.
+
+| Action | Stages | Library (ns) | Redux.NET (ns) | Prototype (ns) | Library bytes/op |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| CachedClass | 0 | 7.77 | 11.08 | 7.84 | 0 B |
+| CachedClass | 1 | 8.01 | 11.19 | 7.79 | 0 B |
+| CachedClass | 3 | 9.60 | 12.80 | 9.58 | 0 B |
+| CachedClass | 8 | 11.16 | 14.63 | 11.14 | 0 B |
+| Class | 0 | 9.96 | 12.89 | 9.97 | 24 B |
+| Class | 1 | 10.22 | 13.14 | 9.94 | 24 B |
+| Class | 3 | 11.85 | 15.01 | 12.02 | 24 B |
+| Class | 8 | 13.25 | 16.95 | 13.20 | 24 B |
+| Struct | 0 | 7.72 | 12.85 | 8.02 | 0 B |
+| Struct | 1 | 8.09 | 13.13 | 8.41 | 0 B |
+| Struct | 3 | 10.15 | 15.20 | 10.15 | 0 B |
+| Struct | 8 | 14.15 | 16.85 | 14.18 | 0 B |
+
+The first struct dispatch took about 180, 197, 244 and 375 ns at 0, 1, 3 and
+8 stages respectively. It allocated 488, 576, 752 and 1,192 B per fresh store.
+All steady-state struct and cached-class cases allocated 0 B per dispatch.
+[Dispatch results](results/library-dispatch.md) and
+[first-dispatch results](results/library-first-dispatch.md) include measurement errors.
+
+We independently reran all 16 library cases and rebuilt the prototype from
+commit `7911228` for a separate run. Relative to that prototype, steady-state
+library means ranged from 2.1% shorter to 2.6% longer, with identical
+allocations. The first dispatch at zero stages took 179.8 ns in the library
+and 170.8 ns in the prototype (5.3% longer). Cold timings use short batches;
+the eight-stage prototype result varied widely and the ordering reversed
+between comparisons. See the [independent measurements](results/library-recheck.md).
+
+## Historical prototype with store-managed dispatch on 2026-11-08
 
 The timed call is `typed.Dispatch(action)` through the concrete store returned
 by Build. Each steady-state case repeats one action type. These 12 means and the

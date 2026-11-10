@@ -12,7 +12,7 @@ namespace Counter
 
         static App()
         {
-            Store = new Store<AppState>(new AppReducer(), new AppState());
+            Store = new StoreBuilder<AppState>(new AppState()).Build(new AppReducer());
         }
     }
 }
