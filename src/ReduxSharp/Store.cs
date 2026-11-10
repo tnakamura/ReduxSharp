@@ -28,10 +28,13 @@ namespace ReduxSharp
             this.factories = factories;
         }
 
-        /// <inheritdoc/>
+        /// <summary>Gets the current state of the store.</summary>
+        /// <value>The initial state, or the state produced by the most recent successful reducer invocation.</value>
         public TState State { get; private set; }
 
-        /// <inheritdoc/>
+        /// <summary>Dispatches an action through its cached, type-specific middleware pipeline.</summary>
+        /// <typeparam name="TAction">The type of action to dispatch.</typeparam>
+        /// <param name="action">The action passed to the middleware pipeline and reducer.</param>
         public void Dispatch<TAction>(TAction action)
         {
             var type = typeof(TAction);
@@ -77,15 +80,15 @@ namespace ReduxSharp
         }
 
         /// <summary>
-        /// Notifies the provider that an observer is to receive notifications.
+        /// Subscribes an observer and immediately notifies it of the current state.
         /// </summary>
         /// <param name="observer">
-        /// The object that is to receive notifications.
+        /// The observer that receives the current state and subsequent state updates.
         /// </param>
         /// <returns>
-        /// A reference to an interface that allows observers to stop receiving notifications
-        /// before the provider has finished sending them.
+        /// An <see cref="IDisposable"/> subscription whose disposal stops updates to this observer.
         /// </returns>
+        /// <exception cref="ArgumentNullException"><paramref name="observer"/> is null.</exception>
         public IDisposable Subscribe(IObserver<TState> observer)
         {
             if (observer == null) throw new ArgumentNullException(nameof(observer));

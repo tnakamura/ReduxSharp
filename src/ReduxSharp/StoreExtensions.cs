@@ -8,7 +8,7 @@ namespace ReduxSharp
     /// </summary>
     /// <typeparam name="TState">A type of root state tree</typeparam>
     /// <param name="store">A store</param>
-    /// <returns>The <see cref="Task"/> that represents the asynchronous operation.</returns>
+    /// <returns>A task that completes when the action creator's asynchronous operation completes.</returns>
     public delegate Task AsyncActionCreator<TState>(IStore<TState> store);
 
     /// <summary>
@@ -21,8 +21,8 @@ namespace ReduxSharp
         /// </summary>
         /// <typeparam name="TState">A type of root state tree</typeparam>
         /// <param name="store">A store</param>
-        /// <param name="asyncActionCreator"></param>
-        /// <returns>The <see cref="Task"/> that represents the asynchronous operation.</returns>
+        /// <param name="asyncActionCreator">The asynchronous operation that can dispatch actions to the store.</param>
+        /// <returns>A task that completes when the supplied action creator completes.</returns>
         public static async Task DispatchAsync<TState>(
             this IStore<TState> store,
             AsyncActionCreator<TState> asyncActionCreator)

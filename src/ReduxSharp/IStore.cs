@@ -11,11 +11,13 @@ namespace ReduxSharp
         /// <summary>
         /// Returns the current state tree of your application.
         /// </summary>
+        /// <value>The initial state, or the state produced by the most recent successful reducer invocation.</value>
         TState State { get; }
 
         /// <summary>
         /// Dispatches an action.
         /// </summary>
+        /// <typeparam name="TAction">The type of action to dispatch.</typeparam>
         /// <param name="action">
         /// An object describing the change that makes sense for your application.
         /// </param>

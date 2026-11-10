@@ -13,7 +13,7 @@
         /// <typeparam name="TAction">A type of action</typeparam>
         /// <param name="state">A state object</param>
         /// <param name="action">An action object</param>
-        /// <returns>A new state object</returns>
+        /// <returns>The next state after applying the action to the supplied state.</returns>
         TState Invoke<TAction>(TState state, TAction action);
     }
 }
