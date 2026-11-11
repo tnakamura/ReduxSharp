@@ -1,12 +1,13 @@
-﻿using System.Windows;
+using System.Windows;
 
 namespace RxCounter
 {
     /// <summary>
-    /// MainWindow.xaml の相互作用ロジック
+    /// Interaction logic for the main window.
     /// </summary>
     public partial class MainWindow : Window
     {
+        /// <summary>Initializes the window and its view model.</summary>
         public MainWindow()
         {
             InitializeComponent();
@@ -16,16 +17,22 @@ namespace RxCounter
 
         MainViewModel ViewModel
         {
-            get { return (MainViewModel)DataContext; }
-            set { DataContext = value; }
+            get
+            {
+                return (MainViewModel)DataContext;
+            }
+            set
+            {
+                DataContext = value;
+            }
         }
 
-        void OnCountUp(object sender, RoutedEventArgs e)
+        void OnCountUp(object sender, RoutedEventArgs eventArgs)
         {
             ViewModel.CountUp();
         }
 
-        void OnCountDown(object sender, RoutedEventArgs e)
+        void OnCountDown(object sender, RoutedEventArgs eventArgs)
         {
             ViewModel.CountDown();
         }

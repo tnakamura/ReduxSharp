@@ -1,4 +1,4 @@
-﻿namespace ReduxSharp.Internal
+namespace ReduxSharp.Internal
 {
     internal interface IObserverLinkedList<T>
     {

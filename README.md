@@ -50,9 +50,13 @@ Actions are payloads of information that send data from your application to your
 ```cs
 namespace HelloWorld
 {
-    public readonly struct Increment {}
+    public readonly struct Increment
+    {
+    }
 
-    public readonly struct Decrement {}
+    public readonly struct Decrement
+    {
+    }
 }
 ```
 
@@ -108,25 +112,33 @@ namespace HelloWorld
     {
         static void Main(string[] args)
         {
-            var store = new StoreBuilder<AppState>(new AppState(0)).Build(new AppReducer());
+            Store<AppState> store = new StoreBuilder<AppState>(new AppState(0)).Build(new AppReducer());
 
-            var p = new Program();
-            using (store.Subscribe(p))
+            var observer = new Program();
+            using (store.Subscribe(observer))
             {
-                store.Dispatch(new Increment()); // => 1
-                store.Dispatch(new Increment()); // => 2
-                store.Dispatch(new Decrement()); // => 1
-                store.Dispatch(new Increment()); // => 2
+                // Prints 1.
+                store.Dispatch(new Increment());
+                // Prints 2.
+                store.Dispatch(new Increment());
+                // Prints 1.
+                store.Dispatch(new Decrement());
+                // Prints 2.
+                store.Dispatch(new Increment());
             }
         }
 
         public void OnNext(AppState value) =>
             Console.WriteLine(value.Count);
 
-        public void OnCompleted() { }
+        public void OnCompleted()
+        {
+        }
 
-        public void OnError(Exception error) { }
-    } 
+        public void OnError(Exception error)
+        {
+        }
+    }
 }
 ```
 
@@ -145,19 +157,19 @@ public sealed class ConsoleLoggingMiddleware<TState> : IMiddlewareFactory<TState
 {
     public Action<TAction> Build<TAction>(IStore<TState> store, Action<TAction> next)
     {
-        var name = typeof(TAction).Name;
+        string actionName = typeof(TAction).Name;
         return action =>
         {
-            Console.WriteLine($"Dispatching {name}");
+            Console.WriteLine($"Dispatching {actionName}");
             next(action);
-            Console.WriteLine($"Dispatched {name}");
+            Console.WriteLine($"Dispatched {actionName}");
         };
     }
 }
 ```
 
 ```csharp
-var store = new StoreBuilder<AppState>(new AppState(0))
+Store<AppState> store = new StoreBuilder<AppState>(new AppState(0))
     .Use(new ConsoleLoggingMiddleware<AppState>())
     .Build(new AppReducer());
 store.Dispatch(new Increment());

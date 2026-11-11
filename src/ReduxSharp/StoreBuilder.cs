@@ -7,12 +7,12 @@ namespace ReduxSharp
     /// <typeparam name="TState">The type of state held by the store.</typeparam>
     public sealed class StoreBuilder<TState> : IStoreBuilder<TState>
     {
-        readonly TState initialState;
-        readonly List<IMiddlewareFactory<TState>> factories = new List<IMiddlewareFactory<TState>>();
+        readonly TState _initialState;
+        readonly List<IMiddlewareFactory<TState>> _factories = new List<IMiddlewareFactory<TState>>();
 
         /// <summary>Creates a builder with the given initial state.</summary>
         /// <param name="initialState">The state supplied to each store created by this builder.</param>
-        public StoreBuilder(TState initialState) => this.initialState = initialState;
+        public StoreBuilder(TState initialState) => _initialState = initialState;
 
         /// <summary>Appends a middleware factory to the pipeline.</summary>
         /// <param name="factory">The factory used to build a stage for each store and action type.</param>
@@ -20,8 +20,12 @@ namespace ReduxSharp
         /// <exception cref="ArgumentNullException"><paramref name="factory"/> is null.</exception>
         public IStoreBuilder<TState> Use(IMiddlewareFactory<TState> factory)
         {
-            if (factory == null) throw new ArgumentNullException(nameof(factory));
-            factories.Add(factory);
+            if (factory == null)
+            {
+                throw new ArgumentNullException(nameof(factory));
+            }
+
+            _factories.Add(factory);
             return this;
         }
 
@@ -31,8 +35,12 @@ namespace ReduxSharp
         /// <exception cref="ArgumentNullException"><paramref name="reducer"/> is null.</exception>
         public Store<TState> Build(IReducer<TState> reducer)
         {
-            if (reducer == null) throw new ArgumentNullException(nameof(reducer));
-            return new Store<TState>(initialState, reducer, factories.ToArray());
+            if (reducer == null)
+            {
+                throw new ArgumentNullException(nameof(reducer));
+            }
+
+            return new Store<TState>(_initialState, reducer, _factories.ToArray());
         }
     }
 }

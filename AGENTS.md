@@ -20,9 +20,13 @@ Use Windows with Visual Studio/MSBuild and the appropriate .NET Framework target
 
 ## Coding Style & Naming Conventions
 
-Use four-space indentation, braces on separate lines, and block-scoped namespaces. Match existing PascalCase type/method/property names and camelCase parameters, locals, and private fields. Prefix interfaces with `I` and generic type parameters with `T` (for example, `IStore<TState>`).
+Follow the Microsoft Learn [C# identifier naming rules and conventions](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/identifier-names) and [common C# code conventions](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/coding-conventions). Use the repository `.editorconfig` for formatting and naming checks.
 
-Keep library code compatible with C# 8 and nullable reference types. Document public APIs with XML comments. No repository-specific formatter or lint configuration is present; follow neighboring code.
+Use four-space indentation and Allman braces. Use PascalCase for types, methods, properties, events, and constants; camelCase for parameters and locals; `_camelCase` for private/internal instance fields; and `s_camelCase` for private/internal static fields (`t_camelCase` for thread-static fields). Prefix interfaces with `I` and descriptive generic type parameters with `T`. Use descriptive names, explicit types when the initializer does not make the type apparent, and braces around control-flow bodies. Document public APIs with XML comments.
+
+Keep the library compatible with C# 8, .NET Standard 2.0, and nullable reference types. Keep the older console and WPF examples compatible with their existing language versions; use block-scoped namespaces in these projects and the library. Use file-scoped namespaces in the tests and .NET 10 benchmarks. Do not adopt language features or APIs unsupported by a project's target. Preserve the existing public `AsyncActionCreator<TState>` delegate for API compatibility; prefer `Func<>` and `Action<>` for new delegates. Leave designer-generated code to its generator. The article's 65-character line guidance is intended for documentation samples; wrap repository source where it improves readability.
+
+Validate supported projects with `dotnet format <project> --no-restore --verify-no-changes` in addition to builds and tests. WPF projects require the Windows tooling described above.
 
 ## Testing Guidelines
 
