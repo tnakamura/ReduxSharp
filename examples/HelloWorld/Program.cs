@@ -1,18 +1,16 @@
-﻿namespace HelloWorld
-{
-    using System;
-    using ReduxSharp;
+using System;
+using ReduxSharp;
 
+namespace HelloWorld
+{
     class Program : IObserver<AppState>
     {
         static void Main(string[] args)
         {
-            var store = new Store<AppState>(
-                new AppReducer(),
-                new AppState(0));
+            Store<AppState> store = new StoreBuilder<AppState>(new AppState(0)).Build(new AppReducer());
 
-            var p = new Program();
-            using (store.Subscribe(p))
+            var observer = new Program();
+            using (store.Subscribe(observer))
             {
                 store.Dispatch(new Increment());
                 store.Dispatch(new Increment());
@@ -23,27 +21,48 @@
             Console.ReadLine();
         }
 
+        /// <inheritdoc/>
         public void OnNext(AppState value) =>
             Console.WriteLine(value.Count);
 
-        public void OnCompleted() { }
+        /// <inheritdoc/>
+        public void OnCompleted()
+        {
+        }
 
-        public void OnError(Exception error) { }
+        /// <inheritdoc/>
+        public void OnError(Exception error)
+        {
+        }
     }
 
+    /// <summary>Holds the application state.</summary>
     public class AppState
     {
+        /// <summary>Initializes the counter with the supplied value.</summary>
         public AppState(int count) => Count = count;
 
-        public int Count { get; }
+        /// <summary>Gets the counter value.</summary>
+        public int Count
+        {
+            get;
+        }
     }
 
-    public readonly struct Increment { }
+    /// <summary>Increments the counter.</summary>
+    public readonly struct Increment
+    {
+    }
 
-    public readonly struct Decrement { }
+    /// <summary>Decrements the counter.</summary>
+    public readonly struct Decrement
+    {
+    }
 
+    /// <summary>Computes the next application state from dispatched actions.</summary>
     public class AppReducer : IReducer<AppState>
     {
+        /// <inheritdoc/>
         public AppState Invoke<TAction>(AppState state, TAction action)
         {
             switch (action)

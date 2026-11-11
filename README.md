@@ -50,9 +50,13 @@ Actions are payloads of information that send data from your application to your
 ```cs
 namespace HelloWorld
 {
-    public readonly struct Increment {}
+    public readonly struct Increment
+    {
+    }
 
-    public readonly struct Decrement {}
+    public readonly struct Decrement
+    {
+    }
 }
 ```
 
@@ -88,7 +92,7 @@ namespace HelloWorld
 
 ### Store
 
-Create an instance of `Store<TState>`.
+Build a store using `StoreBuilder<TState>`.
 The `Store<TState>` is the class that bring actions and reducer together.
 The store has the following responsibilities:
 
@@ -96,7 +100,7 @@ The store has the following responsibilities:
 - Allows state to be update via `Dispatch<TAction>(TAction action)`.
 - Registers listeners via `Subscribe(IObserver observer)`.The `Store<TState>` class implements IObservable.
 
-The `Store<TState>` take an initial state, of type TState, and a reducer.
+Pass the initial state to the builder and the reducer to `Build`.
 
 ```c#
 using System;
@@ -108,53 +112,79 @@ namespace HelloWorld
     {
         static void Main(string[] args)
         {
-            var store = new Store<AppState>(
-                new AppReducer(),
-                new AppState(0));
+            Store<AppState> store = new StoreBuilder<AppState>(new AppState(0)).Build(new AppReducer());
 
-            var p = new Program();
-            using (store.Subscribe(p))
+            var observer = new Program();
+            using (store.Subscribe(observer))
             {
-                store.Dispatch(new Increment()); // => 1
-                store.Dispatch(new Increment()); // => 2
-                store.Dispatch(new Decrement()); // => 1
-                store.Dispatch(new Increment()); // => 2
+                // Prints 1.
+                store.Dispatch(new Increment());
+                // Prints 2.
+                store.Dispatch(new Increment());
+                // Prints 1.
+                store.Dispatch(new Decrement());
+                // Prints 2.
+                store.Dispatch(new Increment());
             }
         }
 
         public void OnNext(AppState value) =>
             Console.WriteLine(value.Count);
 
-        public void OnCompleted() { }
+        public void OnCompleted()
+        {
+        }
 
-        public void OnError(Exception error) { }
-    } 
-}
-```
-
-
-### Middlewares
-
-ReduxSharp supports middlewares.
-You can insert processing before and after `IReducer<TState>.Invoke<TAction>(TState, TAction)` is called.
-
-```cs
-using Newtonsoft.Json;
-using ReduxSharp;
-
-public class ConsoleLoggingMiddleware<TState> : IMiddleware<TState>
-{
-    public void Invoke<TAction>(IStore<TState> store, IDispatcher next, TAction action)
-    {
-        Console.WriteLine(JsonConvert.SerializeObject(store.State));
-
-        next.Invoke(action);
-
-        Console.WriteLine(JsonConvert.SerializeObject(store.State));
+        public void OnError(Exception error)
+        {
+        }
     }
 }
 ```
 
+
+### Middleware
+
+Register factories in execution order with `Use`, then call `Build`.
+Each store builds the chain once per dispatched action type and caches it.
+The factory can capture per-store, per-action-type data when building the delegate.
+
+```csharp
+using System;
+using ReduxSharp;
+
+public sealed class ConsoleLoggingMiddleware<TState> : IMiddlewareFactory<TState>
+{
+    public Action<TAction> Build<TAction>(IStore<TState> store, Action<TAction> next)
+    {
+        string actionName = typeof(TAction).Name;
+        return action =>
+        {
+            Console.WriteLine($"Dispatching {actionName}");
+            next(action);
+            Console.WriteLine($"Dispatched {actionName}");
+        };
+    }
+}
+```
+
+```csharp
+Store<AppState> store = new StoreBuilder<AppState>(new AppState(0))
+    .Use(new ConsoleLoggingMiddleware<AppState>())
+    .Build(new AppReducer());
+store.Dispatch(new Increment());
+```
+
+Registration extensions can accept and return `IStoreBuilder<TState>`. See the
+[logging extension](examples/Benchmark/Examples/LoggingMiddlewareExtensions.cs).
+
+**Migrating from the old API.** Replace `new Store<TState>(reducer, state)` with
+`new StoreBuilder<TState>(state).Build(reducer)`. For each old middleware,
+move the per-dispatch body of `IMiddleware.Invoke` into the delegate returned by
+`IMiddlewareFactory.Build`, as shown above. Replace `next.Invoke(action)` with
+`next(action)` to continue the current chain. To send another action type, call
+`store.Dispatch(otherAction)` to start its pipeline at the first middleware.
+Existing reducers and async action creators can be reused.
 
 ## Examples
 

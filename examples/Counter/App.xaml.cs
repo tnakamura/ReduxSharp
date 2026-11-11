@@ -1,18 +1,19 @@
-﻿using ReduxSharp;
 using System.Windows;
+using ReduxSharp;
 
 namespace Counter
 {
     /// <summary>
-    /// App.xaml の相互作用ロジック
+    /// Interaction logic for the application.
     /// </summary>
     public partial class App : Application
     {
+        /// <summary>Gets the shared application store.</summary>
         public static IStore<AppState> Store { get; }
 
         static App()
         {
-            Store = new Store<AppState>(new AppReducer(), new AppState());
+            Store = new StoreBuilder<AppState>(new AppState()).Build(new AppReducer());
         }
     }
 }

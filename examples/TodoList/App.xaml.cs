@@ -1,18 +1,19 @@
-﻿using System.Windows;
+using System.Windows;
 using ReduxSharp;
 
 namespace TodoList
 {
     /// <summary>
-    /// App.xaml の相互作用ロジック
+    /// Interaction logic for the application.
     /// </summary>
     public partial class App : Application
     {
+        /// <summary>Gets the shared application store.</summary>
         public static IStore<AppState> Store { get; }
 
         static App()
         {
-            Store = new Store<AppState>(new TodoManagerReducer(), new AppState());
+            Store = new StoreBuilder<AppState>(new AppState()).Build(new TodoManagerReducer());
         }
     }
 }

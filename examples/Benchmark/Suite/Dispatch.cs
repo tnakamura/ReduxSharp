@@ -1,48 +1,51 @@
-﻿using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Attributes;
 
-namespace Benchmark.Suite
+namespace Benchmark.Suite;
+
+/// <summary>Measures dispatch costs for value and reference type actions.</summary>
+[Config(typeof(BenchmarkConfig))]
+public class Dispatch
 {
-    [Config(typeof(BenchmarkConfig))]
-    public class Dispatch
+    ReduxSharp.Store<AppState> _reduxSharpStore;
+
+    Redux.Store<AppState> _reduxDotNetStore;
+
+    /// <summary>Creates the stores used by the benchmark.</summary>
+    [GlobalSetup]
+    public void Setup()
     {
-        ReduxSharp.Store<AppState> reduxSharpStore;
+        _reduxSharpStore = new ReduxSharp.StoreBuilder<AppState>(new AppState()).Build(new AppReducer());
 
-        Redux.Store<AppState> reduxDotNetStore;
+        _reduxDotNetStore = new Redux.Store<AppState>(
+            AppReducer.Reduce,
+            new AppState());
+    }
 
-        [GlobalSetup]
-        public void Setup()
-        {
-            reduxSharpStore = new ReduxSharp.Store<AppState>(
-                new AppReducer(),
-                new AppState());
+    /// <summary>Dispatches a value type action through Redux.NET.</summary>
+    [Benchmark]
+    public Redux.IAction ReduxDotNetStruct()
+    {
+        return _reduxDotNetStore.Dispatch(new StructIncrementAction());
+    }
 
-            reduxDotNetStore = new Redux.Store<AppState>(
-                AppReducer.Reduce,
-                new AppState());
-        }
+    /// <summary>Dispatches a value type action through ReduxSharp.</summary>
+    [Benchmark]
+    public void ReduxSharpStruct()
+    {
+        _reduxSharpStore.Dispatch(new StructIncrementAction());
+    }
 
-        [Benchmark]
-        public Redux.IAction ReduxDotNet_struct()
-        {
-            return reduxDotNetStore.Dispatch(new StructIncrementAction());
-        }
+    /// <summary>Dispatches a new reference type action through Redux.NET.</summary>
+    [Benchmark]
+    public Redux.IAction ReduxDotNetClass()
+    {
+        return _reduxDotNetStore.Dispatch(new ClassIncrementAction());
+    }
 
-        [Benchmark]
-        public void ReduxSharp_struct()
-        {
-            reduxSharpStore.Dispatch(new StructIncrementAction());
-        }
-
-        [Benchmark]
-        public Redux.IAction ReduxDotNet_class()
-        {
-            return reduxDotNetStore.Dispatch(new ClassIncrementAction());
-        }
-
-        [Benchmark]
-        public void ReduxSharp_class()
-        {
-            reduxSharpStore.Dispatch(new ClassIncrementAction());
-        }
+    /// <summary>Dispatches a new reference type action through ReduxSharp.</summary>
+    [Benchmark]
+    public void ReduxSharpClass()
+    {
+        _reduxSharpStore.Dispatch(new ClassIncrementAction());
     }
 }

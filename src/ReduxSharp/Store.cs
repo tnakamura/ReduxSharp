@@ -1,5 +1,5 @@
-﻿using System;
-using System.Linq;
+using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using ReduxSharp.Internal;
 
@@ -8,119 +8,118 @@ namespace ReduxSharp
     /// <summary>
     /// A store that holds the complete state tree of your application.
     /// </summary>
-    /// <typeparam name="TState">A type of root state tree</typeparam>
-    public sealed class Store<TState> : IStore<TState>, IDispatcher, IObserverLinkedList<TState>
+    /// <typeparam name="TState">The type of the root state tree.</typeparam>
+    public sealed class Store<TState> : IStore<TState>, IObserverLinkedList<TState>
     {
-        readonly object dispatchLock = new object();
+        readonly IReducer<TState> _reducer;
+        readonly IMiddlewareFactory<TState>[] _factories;
+        readonly object _stateLock = new object();
+        readonly object _buildLock = new object();
+        readonly HashSet<Type> _building = new HashSet<Type>();
+        // Published dictionaries are immutable. A cache hit needs no build lock.
+        volatile Dictionary<Type, Delegate> _entries = new Dictionary<Type, Delegate>();
+        ObserverNode<TState>? _root;
+        ObserverNode<TState>? _last;
 
-        readonly IDispatcher dispatcher;
-
-        readonly IReducer<TState> reducer;
-
-        ObserverNode<TState>? root = null;
-
-        ObserverNode<TState>? last = null;
-
-        /// <summary>
-        /// Initializes a new instance of <see cref="Store{TState}"/> class.
-        /// </summary>
-        /// <param name="reducer">
-        /// A reducing function that returns the next state tree.
-        /// </param>
-        /// <param name="state">
-        /// The initial state.
-        /// </param>
-        /// <param name="middlewares">
-        /// Objects that conform to the Redux middleware API.
-        /// </param>
-        public Store(IReducer<TState> reducer, TState state, params IMiddleware<TState>[] middlewares)
+        internal Store(TState state, IReducer<TState> reducer, IMiddlewareFactory<TState>[] factories)
         {
-            this.reducer = reducer ?? throw new ArgumentNullException(nameof(reducer));
             State = state;
-            dispatcher = ApplyMiddlewares(middlewares);
+            _reducer = reducer;
+            _factories = factories;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        IDispatcher ApplyMiddlewares(IMiddleware<TState>[] middlewares)
+        /// <summary>Gets the current state of the store.</summary>
+        /// <value>The initial state, or the state produced by the most recent successful reducer invocation.</value>
+        public TState State
         {
-            IDispatcher next = this;
-            foreach (var middleware in middlewares.Reverse())
+            get;
+            private set;
+        }
+
+        /// <summary>Dispatches an action through its cached, type-specific middleware pipeline.</summary>
+        /// <typeparam name="TAction">The type of action to dispatch.</typeparam>
+        /// <param name="action">The action passed to the middleware pipeline and reducer.</param>
+        public void Dispatch<TAction>(TAction action)
+        {
+            Type type = typeof(TAction);
+            Action<TAction> dispatch = _entries.TryGetValue(type, out Delegate entry)
+                ? (Action<TAction>)entry
+                : BuildEntry<TAction>();
+            dispatch(action);
+        }
+
+        Action<TAction> BuildEntry<TAction>()
+        {
+            Type type = typeof(TAction);
+            lock (_buildLock)
             {
-                next = new MiddlewareDispatcher(middleware, this, next);
+                if (_entries.TryGetValue(type, out Delegate entry))
+                {
+                    return (Action<TAction>)entry;
+                }
+
+                if (!_building.Add(type))
+                {
+                    throw new InvalidOperationException("Recursive pipeline construction.");
+                }
+
+                try
+                {
+                    Func<TState, TAction, TState> reduce = _reducer.Invoke<TAction>;
+                    Action<TAction> next = action =>
+                    {
+                        TState state;
+                        lock (_stateLock)
+                        {
+                            state = reduce(State, action);
+                            State = state;
+                        }
+                        OnNext(state);
+                    };
+                    for (var i = _factories.Length - 1; i >= 0; i--)
+                    {
+                        next = _factories[i].Build(this, next)
+                            ?? throw new InvalidOperationException(
+                                "Middleware returned a null dispatcher.");
+                    }
+                    _entries = new Dictionary<Type, Delegate>(_entries) { [type] = next };
+                    return next;
+                }
+                finally
+                {
+                    _building.Remove(type);
+                }
             }
-            return next;
         }
 
         /// <summary>
-        /// Returns the current state tree of your application.
-        /// </summary>
-        public TState State { get; private set; }
-
-        /// <summary>
-        /// Dispatches an action.
-        /// </summary>
-		/// <typeparam name="TAction">A type of action.</typeparam>
-        /// <param name="action">
-        /// An object describing the change that makes sense for your application.
-        /// </param>
-        /// <returns>A task that represents the asynchronous dispatch actions.</returns>
-        public void Dispatch<TAction>(TAction action) => dispatcher.Invoke(action);
-
-        void IDispatcher.Invoke<TAction>(TAction action)
-        {
-            lock (dispatchLock)
-            {
-                State = reducer.Invoke(State, action);
-            }
-            OnNext(State);
-        }
-
-        sealed class MiddlewareDispatcher : IDispatcher
-        {
-            readonly IMiddleware<TState> middleware;
-
-            readonly IDispatcher next;
-
-            readonly IStore<TState> store;
-
-            public MiddlewareDispatcher(
-                IMiddleware<TState> middleware,
-                IStore<TState> store,
-                IDispatcher next)
-            {
-                this.store = store;
-                this.next = next;
-                this.middleware = middleware;
-            }
-
-            public void Invoke<TAction>(TAction action) =>
-                    middleware.Invoke(store, next, action);
-        }
-
-        /// <summary>
-        /// Notifies the provider that an observer is to receive notifications.
+        /// Subscribes an observer and immediately notifies it of the current state.
         /// </summary>
         /// <param name="observer">
-        /// The object that is to receive notifications.
+        /// The observer that receives the current state and subsequent state updates.
         /// </param>
         /// <returns>
-        /// A reference to an interface that allows observers to stop receiving notifications
-        /// before the provider has finished sending them.
+        /// An <see cref="IDisposable"/> subscription whose disposal stops updates to this observer.
         /// </returns>
+        /// <exception cref="ArgumentNullException"><paramref name="observer"/> is null.</exception>
         public IDisposable Subscribe(IObserver<TState> observer)
         {
-            if (observer == null) throw new ArgumentNullException(nameof(observer));
+            if (observer == null)
+            {
+                throw new ArgumentNullException(nameof(observer));
+            }
 
             var next = new ObserverNode<TState>(this, observer);
-            if (root == null)
+            if (_root == null)
             {
-                root = last = next;
+                _root = next;
+                _last = next;
             }
             else
             {
-                last!.Next = next;
-                next.Previous = last;
-                last = next;
+                _last!.Next = next;
+                next.Previous = _last;
+                _last = next;
             }
             next.OnNext(State);
             return next;
@@ -129,7 +128,7 @@ namespace ReduxSharp
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void OnNext(TState value)
         {
-            var node = root;
+            ObserverNode<TState>? node = _root;
             while (node != null)
             {
                 node.OnNext(value);
@@ -139,13 +138,13 @@ namespace ReduxSharp
 
         void IObserverLinkedList<TState>.UnsubscribeNode(ObserverNode<TState> node)
         {
-            if (node == root)
+            if (node == _root)
             {
-                root = node.Next;
+                _root = node.Next;
             }
-            if (node == last)
+            if (node == _last)
             {
-                last = node.Previous;
+                _last = node.Previous;
             }
             if (node.Previous != null)
             {
