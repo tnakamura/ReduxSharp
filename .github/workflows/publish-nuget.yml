@@ -1,0 +1,126 @@
+name: Publish NuGet package
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-nuget-${{ github.event.release.tag_name }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      RELEASE_TAG: ${{ github.event.release.tag_name }}
+    steps:
+      - name: Check out the release commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Validate the release version
+        shell: bash
+        run: |
+          version=$(dotnet msbuild src/ReduxSharp/ReduxSharp.csproj -nologo -getProperty:Version -property:Configuration=Release)
+          export PROJECT_VERSION="$version"
+          python3 - <<'PY'
+          import os
+          import re
+
+          tag = os.environ["RELEASE_TAG"]
+          number = r"(?:0|[1-9][0-9]*)"
+          identifier = rf"(?:{number}|[0-9A-Za-z-]*[A-Za-z-][0-9A-Za-z-]*)"
+          pattern = rf"{number}\.{number}\.{number}(?:-{identifier}(?:\.{identifier})*)?"
+          if re.fullmatch(pattern, tag) is None:
+              raise SystemExit(f"Invalid release tag: {tag!r}. Use 0.6.0 or 0.6.0-beta.1 without a v prefix.")
+          version = os.environ["PROJECT_VERSION"].strip()
+          if tag != version:
+              raise SystemExit(f"Release tag {tag!r} does not match project Version {version!r}.")
+          print(f"Validated release version: {version}")
+          PY
+
+      - name: Restore the library
+        run: dotnet restore src/ReduxSharp/ReduxSharp.csproj
+
+      - name: Restore the tests
+        run: dotnet restore test/ReduxSharp.Tests/ReduxSharp.Tests.csproj
+
+      - name: Build the library
+        run: dotnet build src/ReduxSharp/ReduxSharp.csproj -c Release --no-restore
+
+      - name: Build the tests
+        run: dotnet build test/ReduxSharp.Tests/ReduxSharp.Tests.csproj -c Release --no-restore
+
+      - name: Verify library formatting
+        run: dotnet format src/ReduxSharp/ReduxSharp.csproj --no-restore --verify-no-changes
+
+      - name: Verify test formatting
+        run: dotnet format test/ReduxSharp.Tests/ReduxSharp.Tests.csproj --no-restore --verify-no-changes
+
+      - name: Run the tests
+        env:
+          DOTNET_ROLL_FORWARD: Major
+        run: dotnet test test/ReduxSharp.Tests/ReduxSharp.Tests.csproj -c Release --no-build --no-restore
+
+      - name: Pack the library
+        run: dotnet pack src/ReduxSharp/ReduxSharp.csproj -c Release --no-build --no-restore --output artifacts
+
+      - name: Validate the packages
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+          from zipfile import ZipFile
+
+          for extension in ("nupkg", "snupkg"):
+              packages = list(Path("artifacts").glob(f"*.{extension}"))
+              if len(packages) != 1:
+                  raise SystemExit(f"Expected one .{extension} package, found {len(packages)}.")
+              with ZipFile(packages[0]) as package:
+                  manifests = [name for name in package.namelist() if name.endswith(".nuspec")]
+                  if len(manifests) != 1:
+                      raise SystemExit(f"Expected one nuspec in {packages[0]}.")
+                  root = ET.fromstring(package.read(manifests[0]))
+                  package_id = root.findtext("{*}metadata/{*}id")
+                  version = root.findtext("{*}metadata/{*}version")
+                  if package_id != "ReduxSharp" or version != os.environ["RELEASE_TAG"]:
+                      raise SystemExit(f"Unexpected package identity: {package_id} {version}.")
+              print(f"Validated {packages[0]}")
+          PY
+
+      - name: Save the packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget-${{ github.event.release.tag_name }}
+          path: |
+            artifacts/*.nupkg
+            artifacts/*.snupkg
+          if-no-files-found: error
+
+      - name: Log in to NuGet.org
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
+      - name: Publish the package and symbols
+        env:
+          NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
+        run: |
+          dotnet nuget push "artifacts/*.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate --no-symbols
+          dotnet nuget push "artifacts/*.snupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate

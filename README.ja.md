@@ -195,6 +195,43 @@ store.Dispatch(new Increment());
 - TodoList（[ソースコード](https://github.com/tnakamura/ReduxSharp/blob/master/examples/TodoList)）
   - WPF アプリ
 
+## NuGet.org への公開
+
+GitHub Release を公開すると、対象コミットに対して `Publish NuGet package`
+ワークフローが実行されます。正式版とプレリリースの両方に対応しています。
+タグの作成や push だけではパッケージは公開されません。
+
+### 初回設定
+
+1. `ReduxSharp` パッケージの所有者として NuGet.org にログインし、
+   [Trusted Publishing ポリシー](https://learn.microsoft.com/en-us/nuget/nuget-org/trusted-publishing)
+   を登録します。Repository Owner は `tnakamura`、Repository は `ReduxSharp`、
+   Workflow File は `publish-nuget.yml`（ファイル名のみ）とし、Environment は空欄にします。
+2. GitHub リポジトリの **Settings > Secrets and variables > Actions** で、
+   所有者の NuGet.org ユーザー名をリポジトリ Secret `NUGET_USER` に登録します。
+   メールアドレスではありません。長期 API キーの登録は不要です。
+3. タグの対象コミットにワークフローが含まれるよう、公開用ワークフローをマージしてから
+   リリースタグを作成します。
+
+### バージョンの公開
+
+1. `src/ReduxSharp/ReduxSharp.csproj` の `Version` を更新し、コミットしてマージします。
+   `AssemblyVersion` と `FileVersion` は引き続き個別に管理します。
+2. `Version` と完全に一致するタグ（例: `0.6.0`、`0.6.0-beta.1`）を作成して push します。
+   バージョンは先頭に余分なゼロを付けない3つの数値と、必要に応じて SemVer の
+   プレリリース接尾辞で構成します。`v` 接頭辞やビルドメタデータは付けません。
+3. そのタグを指定して GitHub Release を作成し、リリースノートを準備して
+   **Publish release** を選択します。プレリリース版は Release もプレリリースに設定します。
+4. **Actions** で実行結果を確認します。評価済みのプロジェクトバージョンとタグの照合、
+   ビルド、フォーマット検証、テスト、生成パッケージのバージョン検証を行った後に、
+   有効期間の短い公開用キーを取得します。
+
+`.nupkg` と `.snupkg` は Actions の成果物として保存され、NuGet.org に公開されます。
+失敗した場合は設定上の問題を修正し、**Re-run failed jobs** で再実行できます。
+公開済みのパッケージはスキップし、シンボルは別途送信するため、途中まで公開された場合も
+再試行できます。公開済みの NuGet バージョンは置換できないため、コードの修正には
+新しいバージョンと Release を使用してください。公開用タグは移動しないでください。
+
 ## ライセンス
 
 [MIT](https://opensource.org/licenses/MIT)
