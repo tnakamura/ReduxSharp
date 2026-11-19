@@ -207,6 +207,9 @@ GitHub Release を公開すると、対象コミットに対して `Publish NuGe
    [Trusted Publishing ポリシー](https://learn.microsoft.com/en-us/nuget/nuget-org/trusted-publishing)
    を登録します。Repository Owner は `tnakamura`、Repository は `ReduxSharp`、
    Workflow File は `publish-nuget.yml`（ファイル名のみ）とし、Environment は空欄にします。
+   **Glob Patterns and Packages (Separate by a new line)** には `ReduxSharp` を
+   1行で入力し、公開対象をこのパッケージ ID に限定します。バージョン番号や `.nupkg` の
+   拡張子は付けません。
 2. GitHub リポジトリの **Settings > Secrets and variables > Actions** で、
    所有者の NuGet.org ユーザー名をリポジトリ Secret `NUGET_USER` に登録します。
    メールアドレスではありません。長期 API キーの登録は不要です。

@@ -207,6 +207,9 @@ pushing a tag alone does not publish a package.
    [Trusted Publishing policy](https://learn.microsoft.com/en-us/nuget/nuget-org/trusted-publishing)
    with repository owner `tnakamura`, repository `ReduxSharp`, and workflow file
    `publish-nuget.yml` (the filename only). Leave the environment empty.
+   In **Glob Patterns and Packages (Separate by a new line)**, enter `ReduxSharp`
+   on a single line to restrict publishing to this package ID. Do not include a
+   version number or a `.nupkg` extension.
 2. In the GitHub repository's **Settings > Secrets and variables > Actions**, add
    the repository secret `NUGET_USER` containing that owner's NuGet.org username
    (not an email address). No long-lived NuGet API key is required.
