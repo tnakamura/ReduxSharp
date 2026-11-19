@@ -219,7 +219,8 @@ pushing a tag alone does not publish a package.
 ### Publish a version
 
 1. Update `Version` in `src/ReduxSharp/ReduxSharp.csproj`, then commit and merge
-   the change. Continue managing `AssemblyVersion` and `FileVersion` separately.
+   the change. `AssemblyVersion` and `FileVersion` are derived automatically from
+   `Version` without its prerelease suffix (for example, `1.0.0` becomes `1.0.0.0`).
 2. Create and push a tag matching `Version` exactly, such as `0.6.0` or
    `0.6.0-beta.1`. Use three numeric components without leading zeroes, optionally
    followed by a SemVer prerelease suffix; do not add a `v` prefix or build metadata.

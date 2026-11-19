@@ -219,7 +219,8 @@ GitHub Release を公開すると、対象コミットに対して `Publish NuGe
 ### バージョンの公開
 
 1. `src/ReduxSharp/ReduxSharp.csproj` の `Version` を更新し、コミットしてマージします。
-   `AssemblyVersion` と `FileVersion` は引き続き個別に管理します。
+   `AssemblyVersion` と `FileVersion` は、`Version` からプレリリース接尾辞を除いた値に
+   自動設定されます（例: `1.0.0` は `1.0.0.0`）。
 2. `Version` と完全に一致するタグ（例: `0.6.0`、`0.6.0-beta.1`）を作成して push します。
    バージョンは先頭に余分なゼロを付けない3つの数値と、必要に応じて SemVer の
    プレリリース接尾辞で構成します。`v` 接頭辞やビルドメタデータは付けません。
